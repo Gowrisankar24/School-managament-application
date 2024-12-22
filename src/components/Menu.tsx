@@ -49,7 +49,7 @@ export const Menu = () => {
                 {
                     icon: <PiChalkboardTeacherFill />,
                     label: 'Lessons',
-                    href: '/list/lesssons',
+                    href: '/list/lessons',
                     visible: ['parent', 'admin', 'teacher'],
                 },
                 {
