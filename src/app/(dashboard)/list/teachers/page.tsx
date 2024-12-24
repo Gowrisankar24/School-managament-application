@@ -8,16 +8,17 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { role, teachersListData } from '@/lib/data';
 import { FormModal } from '@/components/FormModal';
+import { sanityFetch } from '@/sanity/lib/live';
+import { TEACHERS_LIST_QUERY } from '@/sanity/lib/queries';
 
 type Teacher = {
-    id: number;
-    teacherId: string;
+    teacherId: number | string;
     name: string;
     email?: string;
     photo: string;
     phone: string;
-    subjects: string[];
-    classes: string[];
+    subjects: string[] | number[];
+    classes: string[] | number[];
     address: string;
 };
 
@@ -57,12 +58,13 @@ const headerColumns = [
     },
 ];
 
-const TeachersListPage = () => {
+const TeachersListPage = async () => {
+    const { data: TeachersListTableData } = await sanityFetch({ query: TEACHERS_LIST_QUERY });
     const renderRow = (item: Teacher) => {
         return (
             <tr
-                key={item?.id}
-                className="border-b border-gray-200 even:bg-slate-100 text-sm hover:bg-lightSky"
+                key={item?.teacherId}
+                className="border-b border-gray-200 even:bg-slate-100 text-sm hover:bg-tableHover"
             >
                 <td className="flex items-center gap-4 p-3">
                     <Image
@@ -78,13 +80,21 @@ const TeachersListPage = () => {
                     </div>
                 </td>
                 <td className="hidden md:table-cell">{item?.teacherId}</td>
-                <td className="hidden md:table-cell">{item?.subjects?.join(',')}</td>
-                <td className="hidden md:table-cell">{item?.classes?.join(',')}</td>
+                <td className="hidden md:table-cell">
+                    {Object.values(item?.subjects)
+                        ?.map(d => d.subjectName)
+                        .join(',')}
+                </td>
+                <td className="hidden md:table-cell">
+                    {Object.values(item?.classes)
+                        ?.map(d => d.name)
+                        .join(',')}
+                </td>
                 <td className="hidden lg:table-cell">{item?.phone}</td>
                 <td className="hidden lg:table-cell">{item?.address}</td>
                 <td>
                     <div className="flex items-center gap-2">
-                        <Link href={`/list/teachers/${item?.id}`}>
+                        <Link href={`/list/teachers/${item?.teacherId}`}>
                             <button className="flex items-center justify-center rounded-full p-2 bg-lightSky">
                                 <FaRegEye className="text-lg" />
                             </button>
@@ -93,7 +103,7 @@ const TeachersListPage = () => {
                             <FormModal
                                 table="teacher"
                                 type="delete"
-                                id={item?.id}
+                                id={item?.teacherId}
                                 icon={<MdDeleteOutline className="text-lg" />}
                             />
                         )}
@@ -126,14 +136,26 @@ const TeachersListPage = () => {
                     </div>
                 </div>
             </div>
+            {/* handling no data */}
+            {TeachersListTableData?.length > 0 ? (
+                <>
+                    {/* List */}
+                    <Table
+                        columns={headerColumns}
+                        renderRow={renderRow}
+                        data={TeachersListTableData}
+                    />
 
-            {/* List */}
-            <Table columns={headerColumns} renderRow={renderRow} data={teachersListData} />
-
-            {/* Pagination */}
-            <div className="">
-                <Pagination />
-            </div>
+                    {/* Pagination */}
+                    <div className="">
+                        <Pagination />
+                    </div>
+                </>
+            ) : (
+                <div className="flex items-center justify-center text-black font-medium text-3xl mt-8">
+                    <span>No Teachers List Found</span>
+                </div>
+            )}
         </div>
     );
 };

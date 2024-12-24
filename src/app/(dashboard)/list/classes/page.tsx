@@ -6,9 +6,11 @@ import { TableSearchCompo } from '@/components/TableSearchCompo';
 import { Table } from '@/components/Table';
 import { Pagination } from '@/components/Pagination';
 import { FormModal } from '@/components/FormModal';
+import { sanityFetch } from '@/sanity/lib/live';
+import { CLASS_LIST_QUERY } from '@/sanity/lib/queries';
 
 type Classes = {
-    id: number;
+    classId: string;
     name: string;
     capacity: number;
     grade: number;
@@ -41,12 +43,13 @@ const headerColumns = [
     },
 ];
 
-const SubjectsListPage = () => {
+const SubjectsListPage = async () => {
+    const { data: ClassListTableData } = await sanityFetch({ query: CLASS_LIST_QUERY });
     const renderRow = (item: Classes) => {
         return (
             <tr
-                key={item?.id}
-                className="border-b border-gray-200 even:bg-slate-100 text-sm hover:bg-lightSky"
+                key={item?.classId}
+                className="border-b border-gray-200 even:bg-slate-100 text-sm hover:bg-tableHover"
             >
                 <td className="flex items-center gap-4 p-3">{item?.name}</td>
 
@@ -66,7 +69,7 @@ const SubjectsListPage = () => {
                                 <FormModal
                                     table="class"
                                     type="delete"
-                                    id={item?.id}
+                                    id={item?.classId}
                                     icon={<MdDeleteOutline className="text-lg" />}
                                 />
                             </>
@@ -101,14 +104,26 @@ const SubjectsListPage = () => {
                     </div>
                 </div>
             </div>
+            {/* handling no data */}
+            {ClassListTableData?.length > 0 ? (
+                <>
+                    {/* List */}
+                    <Table
+                        columns={headerColumns}
+                        renderRow={renderRow}
+                        data={ClassListTableData}
+                    />
 
-            {/* List */}
-            <Table columns={headerColumns} renderRow={renderRow} data={classesListData} />
-
-            {/* Pagination */}
-            <div className="">
-                <Pagination />
-            </div>
+                    {/* Pagination */}
+                    <div className="">
+                        <Pagination />
+                    </div>
+                </>
+            ) : (
+                <div className="flex items-center justify-center text-black font-medium text-3xl mt-8">
+                    <span>No Class List Found</span>
+                </div>
+            )}
         </div>
     );
 };

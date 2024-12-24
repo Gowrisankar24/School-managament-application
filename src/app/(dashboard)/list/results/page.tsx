@@ -6,13 +6,15 @@ import { TableSearchCompo } from '@/components/TableSearchCompo';
 import { Table } from '@/components/Table';
 import { Pagination } from '@/components/Pagination';
 import { FormModal } from '@/components/FormModal';
+import { sanityFetch } from '@/sanity/lib/live';
+import { RESULTS_LIST_QUERY } from '@/sanity/lib/queries';
 
 type Reults = {
-    id: number;
-    subject: string;
-    class: string;
-    teacher: string;
-    student: string;
+    resultId: string | number;
+    subject: { [key: string]: string | number };
+    class: { [key: string]: string | number };
+    teacher: { [key: string]: string | number };
+    student: { [key: string]: string | number };
     date: string;
     type: 'exam' | 'assignment';
     score: number;
@@ -56,18 +58,19 @@ const headerColumns = [
     },
 ];
 
-const ResultsListPage = () => {
+const ResultsListPage = async () => {
+    const { data: ResultListTableData } = await sanityFetch({ query: RESULTS_LIST_QUERY });
     const renderRow = (item: Reults) => {
         return (
             <tr
-                key={item?.id}
-                className="border-b border-gray-200 even:bg-slate-100 text-sm hover:bg-lightSky"
+                key={item?.resultId}
+                className="border-b border-gray-200 even:bg-slate-100 text-sm hover:bg-tableHover"
             >
-                <td className="flex items-center gap-4 p-3">{item?.subject}</td>
-                <td className="hidden md:table-cell">{item?.student}</td>
+                <td className="flex items-center gap-4 p-3">{item?.subject?.subjectName}</td>
+                <td className="hidden md:table-cell">{item?.student?.name}</td>
                 <td className="hidden md:table-cell">{item?.score}</td>
-                <td className="hidden lg:table-cell">{item?.teacher}</td>
-                <td className="hidden lg:table-cell">{item?.class}</td>
+                <td className="hidden lg:table-cell">{item?.teacher?.name}</td>
+                <td className="hidden lg:table-cell">{item?.class?.name}</td>
                 <td className="hidden lg:table-cell">{item?.date}</td>
                 <td>
                     <div className="flex items-center gap-2">
@@ -82,7 +85,7 @@ const ResultsListPage = () => {
                                 <FormModal
                                     table="result"
                                     type="delete"
-                                    id={item?.id}
+                                    id={item?.resultId}
                                     icon={<MdDeleteOutline className="text-lg" />}
                                 />
                             </>
@@ -117,14 +120,26 @@ const ResultsListPage = () => {
                     </div>
                 </div>
             </div>
+            {/* handling no Data */}
+            {ResultListTableData?.length > 0 ? (
+                <>
+                    {/* List */}
+                    <Table
+                        columns={headerColumns}
+                        renderRow={renderRow}
+                        data={ResultListTableData}
+                    />
 
-            {/* List */}
-            <Table columns={headerColumns} renderRow={renderRow} data={resultsListData} />
-
-            {/* Pagination */}
-            <div className="">
-                <Pagination />
-            </div>
+                    {/* Pagination */}
+                    <div className="">
+                        <Pagination />
+                    </div>
+                </>
+            ) : (
+                <div className="flex items-center justify-center text-black font-medium text-3xl mt-8">
+                    <span>No Results List Found</span>
+                </div>
+            )}
         </div>
     );
 };

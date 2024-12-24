@@ -9,7 +9,7 @@ import { MdCloudUpload } from 'react-icons/md';
 
 export const ParentForm = ({ type, data }: { type: 'create' | 'update'; data?: any }) => {
     const schema = z.object({
-        username: z
+        name: z
             .string()
             .min(3, { message: 'Username must be at least 3 characters long!' })
             .max(20, { message: 'Username must be at most 20 characters long!' }),
@@ -52,8 +52,8 @@ export const ParentForm = ({ type, data }: { type: 'create' | 'update'; data?: a
                         label="Username"
                         name="username"
                         register={register}
-                        defaultValue={data?.username}
-                        error={errors?.username}
+                        defaultValue={data?.name}
+                        error={errors?.name}
                     />
                     <ReusableInputFields
                         label="Email"

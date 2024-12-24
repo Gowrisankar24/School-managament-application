@@ -5,7 +5,13 @@ import { PiStudentBold, PiChalkboardTeacherFill } from 'react-icons/pi';
 import { RiParentLine } from 'react-icons/ri';
 import { SiGoogleclassroom } from 'react-icons/si';
 import { TfiWrite } from 'react-icons/tfi';
-import { MdOutlineAssignment, MdOutlineMessage, MdOutlineSettings } from 'react-icons/md';
+import {
+    MdOutlineAssignment,
+    MdOutlineMessage,
+    MdOutlineSettings,
+    MdSubject,
+} from 'react-icons/md';
+import { LuNotebookPen } from 'react-icons/lu';
 import { GrAnnounce } from 'react-icons/gr';
 import { AiOutlineLogout } from 'react-icons/ai';
 import Link from 'next/link';
@@ -41,6 +47,12 @@ export const Menu = () => {
                     visible: ['parent', 'admin', 'teacher'],
                 },
                 {
+                    icon: <MdSubject />,
+                    label: 'Subjects',
+                    href: '/list/subjects',
+                    visible: ['admin'],
+                },
+                {
                     icon: <SiGoogleclassroom />,
                     label: 'Classes',
                     href: '/list/classes',
@@ -49,7 +61,7 @@ export const Menu = () => {
                 {
                     icon: <PiChalkboardTeacherFill />,
                     label: 'Lessons',
-                    href: '/list/lesssons',
+                    href: '/list/lessons',
                     visible: ['parent', 'admin', 'teacher'],
                 },
                 {
@@ -63,6 +75,12 @@ export const Menu = () => {
                     label: 'Assignments',
                     href: '/list/assignments',
                     visible: ['student', 'parent', 'admin', 'teacher'],
+                },
+                {
+                    icon: <LuNotebookPen />,
+                    label: 'Results',
+                    href: '/list/results',
+                    visible: ['admin', 'teacher', 'student', 'parent'],
                 },
                 {
                     icon: <FaUserCheck />,
