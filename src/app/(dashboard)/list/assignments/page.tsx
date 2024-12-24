@@ -6,12 +6,14 @@ import { TableSearchCompo } from '@/components/TableSearchCompo';
 import { Table } from '@/components/Table';
 import { Pagination } from '@/components/Pagination';
 import { FormModal } from '@/components/FormModal';
+import { sanityFetch } from '@/sanity/lib/live';
+import { ASSIGNMENTS_LIST_QUERY } from '@/sanity/lib/queries';
 
 type Assignment = {
-    id: number;
-    subject: string;
-    class: string;
-    teacher: string;
+    assignmentId: number | string;
+    subject: { [key: string]: string | number };
+    class: { [key: string]: string | number };
+    teacher: { [key: string]: string | number };
     dueDate: string;
 };
 
@@ -41,16 +43,17 @@ const headerColumns = [
     },
 ];
 
-const AssignmentsListPage = () => {
+const AssignmentsListPage = async () => {
+    const { data: AssignmentListTableData } = await sanityFetch({ query: ASSIGNMENTS_LIST_QUERY });
     const renderRow = (item: Assignment) => {
         return (
             <tr
-                key={item?.id}
-                className="border-b border-gray-200 even:bg-slate-100 text-sm hover:bg-lightSky"
+                key={item?.assignmentId}
+                className="border-b border-gray-200 even:bg-slate-100 text-sm hover:bg-tableHover"
             >
-                <td className="flex items-center gap-4 p-3">{item?.subject}</td>
-                <td>{item?.class}</td>
-                <td className="hidden md:table-cell">{item?.teacher}</td>
+                <td className="flex items-center gap-4 p-3">{item?.subject?.subjectName}</td>
+                <td>{item?.class?.name}</td>
+                <td className="hidden md:table-cell">{item?.teacher?.name}</td>
                 <td className="hidden md:table-cell">{item?.dueDate}</td>
                 <td>
                     <div className="flex items-center gap-2">
@@ -65,7 +68,7 @@ const AssignmentsListPage = () => {
                                 <FormModal
                                     table="assignment"
                                     type="delete"
-                                    id={item?.id}
+                                    id={item?.assignmentId}
                                     icon={<MdDeleteOutline className="text-lg" />}
                                 />
                             </>
@@ -100,14 +103,26 @@ const AssignmentsListPage = () => {
                     </div>
                 </div>
             </div>
+            {/* handling no Data */}
+            {AssignmentListTableData?.length > 0 ? (
+                <>
+                    {/* List */}
+                    <Table
+                        columns={headerColumns}
+                        renderRow={renderRow}
+                        data={AssignmentListTableData}
+                    />
 
-            {/* List */}
-            <Table columns={headerColumns} renderRow={renderRow} data={assignmentsListData} />
-
-            {/* Pagination */}
-            <div className="">
-                <Pagination />
-            </div>
+                    {/* Pagination */}
+                    <div className="">
+                        <Pagination />
+                    </div>
+                </>
+            ) : (
+                <div className="flex items-center justify-center text-black font-medium text-3xl mt-8">
+                    <span>No Assignments List Found</span>
+                </div>
+            )}
         </div>
     );
 };

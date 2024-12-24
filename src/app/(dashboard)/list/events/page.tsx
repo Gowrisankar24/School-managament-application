@@ -6,11 +6,14 @@ import { TableSearchCompo } from '@/components/TableSearchCompo';
 import { Table } from '@/components/Table';
 import { Pagination } from '@/components/Pagination';
 import { FormModal } from '@/components/FormModal';
+import { sanityFetch } from '@/sanity/lib/live';
+import { EVENTS_LIST_QUERY } from '@/sanity/lib/queries';
+import moment from 'moment';
 
 type Events = {
-    id: number;
+    eventId: number | string;
     title: string;
-    class: string;
+    class: { [key: string]: string | number };
     date: string;
     startTime: string;
     endTime: string;
@@ -47,18 +50,24 @@ const headerColumns = [
     },
 ];
 
-const EventsListPage = () => {
+const EventsListPage = async () => {
+    const { data: EventListTableData } = await sanityFetch({ query: EVENTS_LIST_QUERY });
     const renderRow = (item: Events) => {
+        let d = new Date();
         return (
             <tr
-                key={item?.id}
-                className="border-b border-gray-200 even:bg-slate-100 text-sm hover:bg-lightSky"
+                key={item?.eventId}
+                className="border-b border-gray-200 even:bg-slate-100 text-sm hover:bg-tableHover"
             >
                 <td className="flex items-center gap-4 p-3">{item?.title}</td>
-                <td className="">{item?.class}</td>
+                <td className="">{item?.class?.name}</td>
                 <td className="hidden md:table-cell">{item?.date}</td>
-                <td className="hidden lg:table-cell">{item?.startTime}</td>
-                <td className="hidden lg:table-cell">{item?.endTime}</td>
+                <td className="hidden lg:table-cell">
+                    {moment(item?.startTime).format('h:mm:ss A')}
+                </td>
+                <td className="hidden lg:table-cell">
+                    {moment(item?.endTime).format('h:mm:ss A')}
+                </td>
                 <td>
                     <div className="flex items-center gap-2">
                         {role === 'admin' && (
@@ -72,7 +81,7 @@ const EventsListPage = () => {
                                 <FormModal
                                     table="event"
                                     type="delete"
-                                    id={item?.id}
+                                    id={item?.eventId}
                                     icon={<MdDeleteOutline className="text-lg" />}
                                 />
                             </>
@@ -107,14 +116,26 @@ const EventsListPage = () => {
                     </div>
                 </div>
             </div>
+            {/* handling No data */}
+            {EventListTableData?.length > 0 ? (
+                <>
+                    {/* List */}
+                    <Table
+                        columns={headerColumns}
+                        renderRow={renderRow}
+                        data={EventListTableData}
+                    />
 
-            {/* List */}
-            <Table columns={headerColumns} renderRow={renderRow} data={eventsListData} />
-
-            {/* Pagination */}
-            <div className="">
-                <Pagination />
-            </div>
+                    {/* Pagination */}
+                    <div className="">
+                        <Pagination />
+                    </div>
+                </>
+            ) : (
+                <div className="flex items-center justify-center text-black font-medium text-3xl mt-8">
+                    <span>No Events List Found</span>
+                </div>
+            )}
         </div>
     );
 };

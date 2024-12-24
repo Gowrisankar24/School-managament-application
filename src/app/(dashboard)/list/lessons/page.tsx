@@ -6,12 +6,14 @@ import { TableSearchCompo } from '@/components/TableSearchCompo';
 import { Table } from '@/components/Table';
 import { Pagination } from '@/components/Pagination';
 import { FormModal } from '@/components/FormModal';
+import { sanityFetch } from '@/sanity/lib/live';
+import { LESSONS_LIST_QUERY } from '@/sanity/lib/queries';
 
 type Lessons = {
-    id: number;
+    lessonId: number | string;
     subject: string;
-    class: string;
-    teacher: string;
+    class: { [key: string]: string | number };
+    teacher: { [key: string]: string | number };
 };
 
 const headerColumns = [
@@ -19,7 +21,6 @@ const headerColumns = [
         header: 'Subject Name',
         accessor: 'subject',
     },
-
     {
         header: 'Class',
         accessor: 'class',
@@ -35,16 +36,17 @@ const headerColumns = [
     },
 ];
 
-const LessonsListPage = () => {
+const LessonsListPage = async () => {
+    const { data: LessonsListTableData } = await sanityFetch({ query: LESSONS_LIST_QUERY });
     const renderRow = (item: Lessons) => {
         return (
             <tr
-                key={item?.id}
-                className="border-b border-gray-200 even:bg-slate-100 text-sm hover:bg-lightSky"
+                key={item?.lessonId}
+                className="border-b border-gray-200 even:bg-slate-100 text-sm hover:bg-tableHover"
             >
                 <td className="flex items-center gap-4 p-3">{item?.subject}</td>
-                <td>{item?.class}</td>
-                <td className="hidden md:table-cell">{item?.teacher}</td>
+                <td>{item?.class?.name}</td>
+                <td className="hidden md:table-cell">{item?.teacher?.name}</td>
                 <td>
                     <div className="flex items-center gap-2">
                         {role === 'admin' && (
@@ -58,7 +60,7 @@ const LessonsListPage = () => {
                                 <FormModal
                                     table="lesson"
                                     type="delete"
-                                    id={item?.id}
+                                    id={item?.lessonId}
                                     icon={<MdDeleteOutline className="text-lg" />}
                                 />
                             </>
@@ -94,13 +96,27 @@ const LessonsListPage = () => {
                 </div>
             </div>
 
-            {/* List */}
-            <Table columns={headerColumns} renderRow={renderRow} data={lessonsListData} />
+            {/* handling No data */}
 
-            {/* Pagination */}
-            <div className="">
-                <Pagination />
-            </div>
+            {LessonsListTableData?.length > 0 ? (
+                <>
+                    {/* List */}
+                    <Table
+                        columns={headerColumns}
+                        renderRow={renderRow}
+                        data={LessonsListTableData}
+                    />
+
+                    {/* Pagination */}
+                    <div className="">
+                        <Pagination />
+                    </div>
+                </>
+            ) : (
+                <div className="flex items-center justify-center text-black font-medium text-3xl mt-8">
+                    <span>No Lessons List Found</span>
+                </div>
+            )}
         </div>
     );
 };

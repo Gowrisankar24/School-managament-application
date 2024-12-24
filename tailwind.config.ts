@@ -12,6 +12,7 @@ export default {
                 background: 'var(--background)',
                 foreground: 'var(--foreground)',
                 lightSky: '#84baf5',
+                tableHover: '#cbecfb',
                 lightYellow: '#edd51c',
                 lightBlue: '#99a2de',
                 paleYellow: '#ded895',

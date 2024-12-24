@@ -6,12 +6,14 @@ import { TableSearchCompo } from '@/components/TableSearchCompo';
 import { Table } from '@/components/Table';
 import { Pagination } from '@/components/Pagination';
 import { FormModal } from '@/components/FormModal';
+import { sanityFetch } from '@/sanity/lib/live';
+import { PARENTS_LIST_QUERY } from '@/sanity/lib/queries';
 
 type Parent = {
-    id: number;
+    parentId: string;
     name: string;
     email?: string;
-    students: string[];
+    students: string[] | number[];
     phone?: string;
     address: string;
 };
@@ -43,12 +45,13 @@ const headerColumns = [
     },
 ];
 
-const ParentListPage = () => {
+const ParentListPage = async () => {
+    const { data: ParentsTableListData } = await sanityFetch({ query: PARENTS_LIST_QUERY });
     const renderRow = (item: Parent) => {
         return (
             <tr
-                key={item?.id}
-                className="border-b border-gray-200 even:bg-slate-100 text-sm hover:bg-lightSky"
+                key={item?.parentId}
+                className="border-b border-gray-200 even:bg-slate-100 text-sm hover:bg-tableHover"
             >
                 <td className="flex items-center gap-4 p-3">
                     <div className="flex flex-col">
@@ -56,7 +59,11 @@ const ParentListPage = () => {
                         <p className="text-xs text-gray-400">{item?.email}</p>
                     </div>
                 </td>
-                <td className="hidden md:table-cell">{item?.students?.join(',')}</td>
+                <td className="hidden md:table-cell">
+                    {Object.values(item?.students)
+                        .map(d => d?.name)
+                        .join(',')}
+                </td>
                 <td className="hidden md:table-cell">{item?.phone}</td>
                 <td className="hidden lg:table-cell">{item?.address}</td>
                 <td>
@@ -72,7 +79,7 @@ const ParentListPage = () => {
                                 <FormModal
                                     table="parent"
                                     type="delete"
-                                    id={item?.id}
+                                    id={item?.parentId}
                                     icon={<MdDeleteOutline className="text-lg" />}
                                 />
                             </>
@@ -107,14 +114,26 @@ const ParentListPage = () => {
                     </div>
                 </div>
             </div>
+            {/* handling No data */}
+            {ParentsTableListData?.length > 0 ? (
+                <>
+                    {/* List */}
+                    <Table
+                        columns={headerColumns}
+                        renderRow={renderRow}
+                        data={ParentsTableListData}
+                    />
 
-            {/* List */}
-            <Table columns={headerColumns} renderRow={renderRow} data={parentsListData} />
-
-            {/* Pagination */}
-            <div className="">
-                <Pagination />
-            </div>
+                    {/* Pagination */}
+                    <div className="">
+                        <Pagination />
+                    </div>
+                </>
+            ) : (
+                <div className="flex items-center justify-center text-black font-medium text-3xl mt-8">
+                    <span>No Parents List Found</span>
+                </div>
+            )}
         </div>
     );
 };

@@ -3,20 +3,21 @@ import { Pagination } from '@/components/Pagination';
 import { Table } from '@/components/Table';
 import { TableSearchCompo } from '@/components/TableSearchCompo';
 import { role, studentsListData } from '@/lib/data';
+import { sanityFetch } from '@/sanity/lib/live';
+import { STUDENTS_LIST_QUERY } from '@/sanity/lib/queries';
 import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
 import { FaFilter, FaPlus, FaRegEye, FaSortAmountDown } from 'react-icons/fa';
 import { MdDeleteOutline } from 'react-icons/md';
 type Student = {
-    id: number;
     studentId: string;
     name: string;
     email?: string;
     photo: string;
     phone?: string;
     grade: number;
-    class: string;
+    class: { [key: string]: string | number };
     address: string;
 };
 
@@ -51,12 +52,13 @@ const headerColumns = [
     },
 ];
 
-const StudentListPage = () => {
+const StudentListPage = async () => {
+    const { data: StudentsTableData } = await sanityFetch({ query: STUDENTS_LIST_QUERY });
     const renderRow = (item: Student) => {
         return (
             <tr
-                key={item?.id}
-                className="border-b border-gray-200 even:bg-slate-100 text-sm hover:bg-lightSky"
+                key={item?.studentId}
+                className="border-b border-gray-200 even:bg-slate-100 text-sm hover:bg-tableHover"
             >
                 <td className="flex items-center gap-4 p-3">
                     <Image
@@ -68,7 +70,7 @@ const StudentListPage = () => {
                     />
                     <div className="flex flex-col">
                         <h3 className="font-semibold">{item?.name}</h3>
-                        <p className="text-xs text-gray-400">{item?.class}</p>
+                        <p className="text-xs text-gray-400">{item?.class?.name}</p>
                     </div>
                 </td>
                 <td className="hidden md:table-cell">{item?.studentId}</td>
@@ -77,7 +79,7 @@ const StudentListPage = () => {
                 <td className="hidden lg:table-cell">{item?.address}</td>
                 <td>
                     <div className="flex items-center gap-2">
-                        <Link href={`/list/teachers/${item?.id}`}>
+                        <Link href={`/list/teachers/${item?.studentId}`}>
                             <button className="flex items-center justify-center rounded-full p-2 bg-lightSky">
                                 <FaRegEye className="text-lg" />
                             </button>
@@ -86,7 +88,7 @@ const StudentListPage = () => {
                             <FormModal
                                 table="student"
                                 type="delete"
-                                id={item?.id}
+                                id={item?.studentId}
                                 icon={<MdDeleteOutline className="text-lg" />}
                             />
                         )}
@@ -121,13 +123,22 @@ const StudentListPage = () => {
                 </div>
             </div>
 
-            {/* List */}
-            <Table columns={headerColumns} renderRow={renderRow} data={studentsListData} />
+            {/* handling no data */}
+            {StudentsTableData?.length > 0 ? (
+                <>
+                    {/* List */}
+                    <Table columns={headerColumns} renderRow={renderRow} data={StudentsTableData} />
 
-            {/* Pagination */}
-            <div className="">
-                <Pagination />
-            </div>
+                    {/* Pagination */}
+                    <div className="">
+                        <Pagination />
+                    </div>
+                </>
+            ) : (
+                <div className="flex items-center justify-center text-black font-medium text-3xl mt-8">
+                    <span>No Students List Found</span>
+                </div>
+            )}
         </div>
     );
 };

@@ -13,7 +13,6 @@ import { LessonForm } from './forms/LessonForm';
 import { ExamForm } from './forms/ExamForm';
 import { AssignmentForm } from './forms/AssignmentForm';
 import { ResultForm } from './forms/ResultForm';
-import { AttendanceForm } from './forms/AttendanceForm';
 import { AnnouncementForm } from './forms/Announcement';
 
 export const FormModal = ({
@@ -39,7 +38,7 @@ export const FormModal = ({
         | 'subject';
     type: 'create' | 'update' | 'delete';
     data?: any;
-    id?: number;
+    id?: number | string;
     icon: React.ReactNode;
 }) => {
     const [open, setOpen] = useState(false);

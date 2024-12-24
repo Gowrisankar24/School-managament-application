@@ -7,22 +7,24 @@ import { TableSearchCompo } from '@/components/TableSearchCompo';
 import { Table } from '@/components/Table';
 import { Pagination } from '@/components/Pagination';
 import { FormModal } from '@/components/FormModal';
+import { sanityFetch } from '@/sanity/lib/live';
+import { SUBJECTS_LIST_QUERY } from '@/sanity/lib/queries';
 
 type Subject = {
-    id: number;
-    name: string;
-    teachers: string[];
+    subjectId: number | string;
+    subjectName: string;
+    teacher: string[] | number[];
 };
 
 const headerColumns = [
     {
         header: 'Subjects Name',
-        accessor: 'name',
+        accessor: 'subjectName',
     },
 
     {
         header: 'Teachers',
-        accessor: 'teachers',
+        accessor: 'teacher',
         className: 'hidden md:table-cell',
     },
     {
@@ -31,23 +33,23 @@ const headerColumns = [
     },
 ];
 
-const SubjectsListPage = () => {
+const SubjectsListPage = async () => {
+    const { data: SubjectsListTableData } = await sanityFetch({ query: SUBJECTS_LIST_QUERY });
     const renderRow = (item: Subject) => {
         return (
             <tr
-                key={item?.id}
-                className="border-b border-gray-200 even:bg-slate-100 text-sm hover:bg-lightSky"
+                key={item?.subjectId}
+                className="border-b border-gray-200 even:bg-slate-100 text-sm hover:bg-tableHover"
             >
-                <td className="flex items-center gap-4 p-3">{item?.name}</td>
+                <td className="flex items-center gap-4 p-3">{item?.subjectName}</td>
 
-                <td className="hidden md:table-cell">{item?.teachers?.join(',')}</td>
+                <td className="hidden md:table-cell">
+                    {Object.values(item?.teacher)
+                        ?.map(d => d.name)
+                        ?.join(',')}
+                </td>
                 <td>
                     <div className="flex items-center gap-2">
-                        <Link href={`/list/teachers/${item?.id}`}>
-                            <button className="flex items-center justify-center rounded-full p-2 bg-lightSky">
-                                <FaEdit className="text-sm" />
-                            </button>
-                        </Link>
                         {role === 'admin' && (
                             <>
                                 <FormModal
@@ -60,7 +62,7 @@ const SubjectsListPage = () => {
                                 <FormModal
                                     table="subject"
                                     type="delete"
-                                    id={item?.id}
+                                    id={item?.subjectId}
                                     icon={<MdDeleteOutline className="text-lg" />}
                                 />
                             </>
@@ -95,14 +97,26 @@ const SubjectsListPage = () => {
                     </div>
                 </div>
             </div>
+            {/* handling no data */}
+            {SubjectsListTableData?.length > 0 ? (
+                <>
+                    {/* List */}
+                    <Table
+                        columns={headerColumns}
+                        renderRow={renderRow}
+                        data={SubjectsListTableData}
+                    />
 
-            {/* List */}
-            <Table columns={headerColumns} renderRow={renderRow} data={subjectsListData} />
-
-            {/* Pagination */}
-            <div className="">
-                <Pagination />
-            </div>
+                    {/* Pagination */}
+                    <div className="">
+                        <Pagination />
+                    </div>
+                </>
+            ) : (
+                <div className="flex items-center justify-center text-black font-medium text-3xl mt-8">
+                    <span>No Subjects List Found</span>
+                </div>
+            )}
         </div>
     );
 };
