@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FaFilter, FaPlus, FaEdit, FaSortAmountDown } from 'react-icons/fa';
 import { MdDeleteOutline } from 'react-icons/md';
 import { lessonsListData, role } from '@/lib/data';
@@ -36,7 +36,12 @@ const headerColumns = [
     },
 ];
 
-const LessonsListPage = async () => {
+const LessonsListPage = async ({
+    searchParams,
+}: {
+    searchParams: Promise<{ teacherId: string }>;
+}) => {
+    const id = (await searchParams).teacherId;
     const { data: LessonsListTableData } = await sanityFetch({ query: LESSONS_LIST_QUERY });
     const renderRow = (item: Lessons) => {
         return (
@@ -70,6 +75,7 @@ const LessonsListPage = async () => {
             </tr>
         );
     };
+    const tableRender = () => {};
     return (
         <div className="bg-white p-4 flex-1 rounded-md m-4 mt-0">
             {/* Top */}
@@ -98,13 +104,23 @@ const LessonsListPage = async () => {
 
             {/* handling No data */}
 
-            {LessonsListTableData?.length > 0 ? (
+            {LessonsListTableData?.length === 0 && !id ? (
+                <div className="flex items-center justify-center text-black font-medium text-3xl mt-8">
+                    <span>No Lessons List Found</span>
+                </div>
+            ) : (
                 <>
                     {/* List */}
                     <Table
                         columns={headerColumns}
                         renderRow={renderRow}
-                        data={LessonsListTableData}
+                        data={
+                            id
+                                ? LessonsListTableData?.filter(
+                                      (d: any) => d?.teacher?.teacherId === id
+                                  )
+                                : LessonsListTableData
+                        }
                     />
 
                     {/* Pagination */}
@@ -112,10 +128,6 @@ const LessonsListPage = async () => {
                         <Pagination />
                     </div>
                 </>
-            ) : (
-                <div className="flex items-center justify-center text-black font-medium text-3xl mt-8">
-                    <span>No Lessons List Found</span>
-                </div>
             )}
         </div>
     );

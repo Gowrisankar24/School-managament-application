@@ -43,7 +43,12 @@ const headerColumns = [
     },
 ];
 
-const ExamsListPage = async () => {
+const ExamsListPage = async ({
+    searchParams,
+}: {
+    searchParams: Promise<{ teacherId: string }>;
+}) => {
+    const id = (await searchParams).teacherId;
     const { data: examListTableData } = await sanityFetch({ query: EXAMS_LIST_QUERY });
     const renderRow = (item: Exams) => {
         return (
@@ -108,7 +113,15 @@ const ExamsListPage = async () => {
             {examListTableData?.length > 0 ? (
                 <>
                     {/* List */}
-                    <Table columns={headerColumns} renderRow={renderRow} data={examListTableData} />
+                    <Table
+                        columns={headerColumns}
+                        renderRow={renderRow}
+                        data={
+                            id
+                                ? examListTableData?.filter((d: any) => d?.teacher?.teacherId == id)
+                                : examListTableData
+                        }
+                    />
 
                     {/* Pagination */}
                     <div className="">

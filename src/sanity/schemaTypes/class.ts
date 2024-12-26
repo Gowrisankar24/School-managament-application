@@ -32,7 +32,8 @@ export const classTableTypes = defineType({
         }),
         defineField({
             name: 'supervisor',
-            type: 'string',
+            type: 'reference',
+            to: [{ type: 'teacher' }],
             validation: Rule => Rule.required(),
         }),
     ],

@@ -133,19 +133,19 @@ export const Menu = () => {
         },
     ];
     return (
-        <div className="mt-4 text-sm">
+        <div className="mt-4 text-sm overflow-x-hidden overflow-y-auto h-[90%] max-h-[95%] side-bar">
             {MenuItems?.map(i => (
-                <div className="flex flex-col gap-2" key={i?.title}>
-                    <span className="hidden lg:block text-gray-400 font-light my-2">
+                <details className="flex flex-col gap-2 cursor-pointer" key={i?.title} open={true}>
+                    <summary className="hidden lg:block text-lightSky font-medium my-2 ">
                         {i?.title}
-                    </span>
+                    </summary>
                     {i?.items?.map(d => {
                         if (d?.visible?.includes(role)) {
                             return (
                                 <Link
                                     href={d?.href}
                                     key={d?.label}
-                                    className="flex justify-center lg:justify-start gap-4 text-gray-500 py-1 px-2 font-semibold rounded-md hover:bg-lightSky"
+                                    className="flex justify-center lg:justify-start gap-4 text-gray-500 py-2 px-2 font-semibold rounded-md hover:bg-lightSky"
                                 >
                                     <span className="text-2xl">{d?.icon}</span>
                                     <span className="hidden lg:block">{d?.label}</span>
@@ -153,7 +153,7 @@ export const Menu = () => {
                             );
                         }
                     })}
-                </div>
+                </details>
             ))}
         </div>
     );

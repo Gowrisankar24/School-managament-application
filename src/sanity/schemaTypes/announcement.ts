@@ -26,9 +26,20 @@ export const AnnoncementTableTypes = defineType({
             validation: Rule => Rule.required(),
         }),
         defineField({
+            name: 'teacher',
+            type: 'reference',
+            to: [{ type: 'teacher' }],
+            validation: Rule => Rule.required(),
+        }),
+        defineField({
             name: 'date',
             type: 'date',
             validation: Rule => Rule.required(),
+        }),
+        defineField({
+            name: 'description',
+            type: 'string',
+            validation: Rule => Rule.max(600).required(),
         }),
     ],
     preview: {
