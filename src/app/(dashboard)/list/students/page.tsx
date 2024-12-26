@@ -52,8 +52,13 @@ const headerColumns = [
     },
 ];
 
-const StudentListPage = async () => {
+const StudentListPage = async ({
+    searchParams,
+}: {
+    searchParams: Promise<{ teacherId: string }>;
+}) => {
     const { data: StudentsTableData } = await sanityFetch({ query: STUDENTS_LIST_QUERY });
+    const id = (await searchParams).teacherId;
     const renderRow = (item: Student) => {
         return (
             <tr
@@ -127,7 +132,17 @@ const StudentListPage = async () => {
             {StudentsTableData?.length > 0 ? (
                 <>
                     {/* List */}
-                    <Table columns={headerColumns} renderRow={renderRow} data={StudentsTableData} />
+                    <Table
+                        columns={headerColumns}
+                        renderRow={renderRow}
+                        data={
+                            id
+                                ? StudentsTableData?.filter(
+                                      (d: any) => d?.class?.supervisor?.teacherId === id
+                                  )
+                                : StudentsTableData
+                        }
+                    />
 
                     {/* Pagination */}
                     <div className="">

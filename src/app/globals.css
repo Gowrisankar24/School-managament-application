@@ -2,90 +2,112 @@
 @tailwind components;
 @tailwind utilities;
 
+.side-bar::-webkit-scrollbar {
+    @apply !w-1;
+}
+.side-bar::-webkit-scrollbar-thumb {
+    @apply !bg-[#717171] !rounded-xl;
+}
+
+summary::before {
+    @apply content-['▶️'] !text-lg !font-semibold !gap-2 pe-2 ease-in-out;
+}
+details[open] > summary::before {
+    @apply !content-['🔽'];
+}
 .react-calendar {
-  @apply !w-[100%] !border-none !font-sans;
-}
-.react-calendar__tile--active {
-  @apply !bg-lightSky !text-black;
-}
-.react-calendar__navigation__label__labelText {
-  @apply !font-semibold;
-}
-.rbc-btn-group:first-child,
-.rbc-time-header {
-  @apply !hidden;
-}
-.rbc-toolbar-label {
-  @apply !text-right !px-5 !py-5;
-}
-.rbc-btn-group:last-child {
-  @apply !text-[14px];
-}
-.rbc-btn-group:last-child button {
-  @apply !border-none !bg-gray-200;
-}
-.rbc-toolbar button.rbc-active {
-  @apply !bg-slate-500 !shadow-none !text-white;
-}
-.rbc-time-view {
-  @apply !bg-slate-50;
+    @apply !w-[100%] !border-none !font-sans;
 }
 .rbc-time-content {
-  @apply !border-none;
+    @apply !overflow-x-hidden;
+}
+.react-calendar__tile--active {
+    @apply !bg-lightSky !text-black;
+}
+.react-calendar__navigation__label__labelText {
+    @apply !font-semibold;
+}
+
+.rbc-time-header .rbc-allday-cell {
+    @apply !hidden;
+}
+.rbc-time-view .rbc-row {
+    @apply !h-10 !min-h-6;
+}
+.rbc-toolbar-label {
+    @apply !text-right !px-5 !py-5;
+}
+.rbc-btn-group:last-child {
+    @apply !text-[14px];
+}
+.rbc-btn-group:last-child button {
+    @apply !border-none !bg-gray-200;
+}
+.rbc-toolbar button.rbc-active {
+    @apply !bg-slate-500 !shadow-none !text-white;
+}
+.rbc-time-view {
+    @apply !bg-slate-50;
+}
+.rbc-time-content {
+    @apply !border-none;
 }
 .rbc-time-gutter.rbc-time-column {
-  @apply !text-sm;
+    @apply !text-sm;
 }
 .rbc-time-gutter.rbc-time-column.rbc-timeslot-group {
-  @apply !px-0 !py-8;
+    @apply !px-0 !py-8;
 }
 .rbc-timeslot-group {
-  @apply !bg-blue-100;
+    @apply !bg-blue-100 !h-60 !max-h-80 !min-h-40;
 }
 .rbc-day-slot {
-  @apply !text-xs;
+    @apply !text-xs;
 }
 .rbc-day-slot .rbc-time-slot {
-  @apply !border-t-transparent;
+    @apply !border-t-transparent;
 }
 .rbc-event {
-  @apply !border-none !text-black !p-[10px] !m-[10px] !w-[99%];
+    @apply !border-none !text-black !p-[10px] !m-[10px] !w-[95%] !h-[8%];
 }
 
 .rbc-event:nth-child(1) {
-  @apply !bg-indigo-200;
+    @apply !bg-indigo-200;
 }
 .rbc-event:nth-child(2) {
-  @apply !bg-blue-200;
+    @apply !bg-blue-200;
 }
 .rbc-event:nth-child(3) {
-  @apply !bg-yellow-100;
+    @apply !bg-yellow-100;
 }
 .rbc-event:nth-child(4) {
-  @apply !bg-purple-300;
+    @apply !bg-purple-300;
 }
 .rbc-event:nth-child(5) {
-  @apply !bg-pink-200;
+    @apply !bg-pink-200;
 }
 .rbc-event:nth-child(6) {
-  @apply !bg-red-200;
+    @apply !bg-red-200;
 }
 .rbc-event:nth-child(7) {
-  @apply !bg-orange-200;
+    @apply !bg-orange-200;
 }
 .rbc-event:nth-child(8) {
-  @apply !bg-green-200;
+    @apply !bg-green-200;
 }
 .rbc-event:nth-child(9) {
-  @apply !bg-lime-200;
+    @apply !bg-lime-200;
 }
 .rbc-event:nth-child(10) {
-  @apply !bg-violet-400;
+    @apply !bg-violet-400;
 }
 .rbc-event:nth-child(11) {
-  @apply !bg-violet-200;
+    @apply !bg-violet-200;
 }
 
 .rbc-event-label {
-  @apply !text-gray-600 !mb-5 !font-normal;
+    @apply !text-gray-600 !mb-5 !font-normal;
+}
+.rbc-event-content {
+    @apply !font-semibold;
 }

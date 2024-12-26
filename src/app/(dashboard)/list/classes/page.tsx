@@ -14,7 +14,7 @@ type Classes = {
     name: string;
     capacity: number;
     grade: number;
-    supervisor: string;
+    supervisor: { [key: string]: string | number };
 };
 
 const headerColumns = [
@@ -43,8 +43,13 @@ const headerColumns = [
     },
 ];
 
-const SubjectsListPage = async () => {
+const SubjectsListPage = async ({
+    searchParams,
+}: {
+    searchParams: Promise<{ supervisorId: string }>;
+}) => {
     const { data: ClassListTableData } = await sanityFetch({ query: CLASS_LIST_QUERY });
+    const id = (await searchParams).supervisorId;
     const renderRow = (item: Classes) => {
         return (
             <tr
@@ -55,7 +60,7 @@ const SubjectsListPage = async () => {
 
                 <td className="hidden md:table-cell">{item?.capacity}</td>
                 <td className="hidden md:table-cell">{item?.grade}</td>
-                <td className="hidden lg:table-cell">{item?.supervisor}</td>
+                <td className="hidden lg:table-cell">{item?.supervisor?.name}</td>
                 <td>
                     <div className="flex items-center gap-2">
                         {role === 'admin' && (
@@ -107,17 +112,29 @@ const SubjectsListPage = async () => {
             {/* handling no data */}
             {ClassListTableData?.length > 0 ? (
                 <>
-                    {/* List */}
-                    <Table
-                        columns={headerColumns}
-                        renderRow={renderRow}
-                        data={ClassListTableData}
-                    />
+                    <>
+                        {/* List */}
+                        <Table
+                            columns={headerColumns}
+                            renderRow={renderRow}
+                            data={
+                                id
+                                    ? ClassListTableData.filter(
+                                          (d: any) => d?.supervisor?.teacherId === id
+                                      )
+                                    : ClassListTableData
+                            }
+                        />
 
-                    {/* Pagination */}
-                    <div className="">
-                        <Pagination />
-                    </div>
+                        {!id && (
+                            <>
+                                {/* Pagination */}
+                                <div className="">
+                                    <Pagination />
+                                </div>
+                            </>
+                        )}
+                    </>
                 </>
             ) : (
                 <div className="flex items-center justify-center text-black font-medium text-3xl mt-8">

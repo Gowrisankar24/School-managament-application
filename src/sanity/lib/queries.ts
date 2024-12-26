@@ -37,6 +37,10 @@ export const STUDENTS_LIST_QUERY = defineQuery(`
     name,
     capacity,
     grade,
+    supervisor->{
+      teacherId,
+      name
+    }
     },
     address,
 }`);
@@ -67,7 +71,10 @@ _id,
     name,
     capacity,
     grade,
-    supervisor
+    supervisor->{
+      teacherId,
+      name
+    }
 }`);
 
 export const LESSONS_LIST_QUERY = defineQuery(`
@@ -205,4 +212,49 @@ export const ANNOUNCEMENTS_LIST_QUERY = defineQuery(`
      name,
      },
      date
-  }`);
+}`);
+
+//each Teacher`s info
+export const TEACHERS_INFO_BY_ID = defineQuery(`
+  *[_type == 'teacher' && teacherId == $id][0]{
+      _id,
+      _createdAt,
+      teacherId,
+      name,
+      description,
+      email,
+      photo,
+      phone,
+      subjects[] -> {
+        subjectId,
+        subjectName
+      },
+      classes[] -> {
+        classId,
+        name,
+        supervisor ->{
+         teacherId,
+         name,
+        }
+      },
+      address,
+      dob,
+      bloodType,
+      attendance,
+      branches,
+      lessons,
+      Performance,
+      ScheduleTime[]| order(start asc){
+      start,
+      end,
+      class ->{
+       name,
+      },
+      title -> {
+          subjectName
+      },
+      },
+      "relatedAnnouncementTop3": *[_type == 'announcement' && teacher._ref == ^._id]|order(date desc) [0..3]{_id,title,description,date},
+      "relatedAnnouncements": *[_type == 'announcement' && teacher._ref == ^._id] | order(date desc){_id,title,description,date}
+   }
+`);
