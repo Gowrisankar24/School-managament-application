@@ -1,14 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
-import { FieldErrors } from 'react-hook-form';
+import { FieldError } from 'react-hook-form';
 
 type InputFieldsType = {
     label: string;
-    type: string;
+    type?: string;
     register: any;
     name: string;
     defaultValue?: string;
-    error?: FieldErrors;
+    error?: FieldError;
     inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
 };
 

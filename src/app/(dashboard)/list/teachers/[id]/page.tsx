@@ -9,14 +9,21 @@ import { Announcements } from '@/components/Announcements';
 import Link from 'next/link';
 import { PerformanceChart } from '@/components/PerformanceChart';
 import { FormModal } from '@/components/FormModal';
-import { sanityFetch } from '@/sanity/lib/live';
-import { TEACHERS_INFO_BY_ID } from '@/sanity/lib/queries';
+import { CLASS_LIST_QUERY, SUBJECTS_LIST_QUERY, TEACHERS_INFO_BY_ID } from '@/sanity/lib/queries';
 import { client } from '@/sanity/lib/client';
 import moment from 'moment';
+import { Tooltip } from '@mui/material';
 
 const TeacherProfilePage = async ({ params }: { params: Promise<{ id: string }> }) => {
     const id = (await params).id;
     const data = await client.fetch(TEACHERS_INFO_BY_ID, { id });
+    const getUniqueClasses = await client.fetch(CLASS_LIST_QUERY);
+    const SubjectsListTableData = await client.fetch(SUBJECTS_LIST_QUERY);
+    const filteredClsData = getUniqueClasses?.map((d: any) => ({ _id: d?._id, name: d?.name }));
+    const filteredSubData = SubjectsListTableData?.map((d: any) => ({
+        _id: d?._id,
+        subjectName: d?.subjectName,
+    }));
     return (
         <div className="flex-1 p-4 flex flex-col gap-4 xl:flex-row">
             {/* Left */}
@@ -42,14 +49,24 @@ const TeacherProfilePage = async ({ params }: { params: Promise<{ id: string }> 
                                     type="update"
                                     data={data}
                                     icon={<FaEdit className="text-sm" />}
+                                    dropdownClsData={filteredClsData}
+                                    dropdownSubsData={filteredSubData}
                                 />
                             </div>
 
                             <span className="text-sm text-gray-500">
-                                {data?.description.slice(0, 150)}...
+                                {data?.description?.length > 150 ? (
+                                    <>
+                                        <Tooltip title={data?.description}>
+                                            {data?.description?.slice(0, 150)}...
+                                        </Tooltip>
+                                    </>
+                                ) : (
+                                    <span>{data?.description}</span>
+                                )}
                             </span>
 
-                            <div className="flex justify-between items-center gap-2 flex-wrap text-xs font-medium">
+                            <div className="flex justify-between items-center gap-2 flex-wrap text-xs font-medium whitespace-nowrap text-ellipsis overflow-hidden">
                                 <div className="w-full md:w-1/3 lg:w-full 2xl:w-1/3 flex items-center gap-2">
                                     <MdBloodtype className="text-sm" />
                                     <span>{data?.bloodType}</span>
@@ -88,7 +105,9 @@ const TeacherProfilePage = async ({ params }: { params: Promise<{ id: string }> 
                         <div className="bg-white p-4 rounded-md flex gap-4 w-full md:w-[48%] xl:w-[45%] 2xl:w-[w-48%]">
                             <FaChalkboard className="w-6 h-6" />
                             <div className="">
-                                <h1 className="font-semibold text-xl">{data?.lessons}</h1>
+                                <h1 className="font-semibold text-xl">
+                                    {data?.teacherlessonCount}
+                                </h1>
                                 <span className="text-sm text-gray-500">Lessons</span>
                             </div>
                         </div>
@@ -103,7 +122,7 @@ const TeacherProfilePage = async ({ params }: { params: Promise<{ id: string }> 
                 </div>
                 {/* Teacher`s schedule calendar */}
                 <div className="mt-4 bg-white rounded-md p-4 h-[800px]">
-                    <h2 className="font-medium">Teacher`s Schedule</h2>
+                    <h1 className="font-medium">Teacher`s Schedule</h1>
                     <ScheduleBigCalendar scheduleData={data?.ScheduleTime} />
                 </div>
             </div>

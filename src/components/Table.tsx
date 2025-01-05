@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
 
-export const Table = ({
+const Table = ({
     columns,
     renderRow,
     data,
@@ -27,3 +27,5 @@ export const Table = ({
         </>
     );
 };
+
+export default Table;

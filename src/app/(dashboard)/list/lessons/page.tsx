@@ -11,7 +11,7 @@ import { LESSONS_LIST_QUERY } from '@/sanity/lib/queries';
 
 type Lessons = {
     lessonId: number | string;
-    subject: string;
+    subject: { [key: string]: string | number };
     class: { [key: string]: string | number };
     teacher: { [key: string]: string | number };
 };
@@ -39,17 +39,17 @@ const headerColumns = [
 const LessonsListPage = async ({
     searchParams,
 }: {
-    searchParams: Promise<{ teacherId: string }>;
+    searchParams: Promise<{ teacherId?: string; classId?: string }>;
 }) => {
-    const id = (await searchParams).teacherId;
-    const { data: LessonsListTableData } = await sanityFetch({ query: LESSONS_LIST_QUERY });
+    const { teacherId: id, classId } = await searchParams;
+    const { data: LessonsListTableData = [] } = await sanityFetch({ query: LESSONS_LIST_QUERY });
     const renderRow = (item: Lessons) => {
         return (
             <tr
                 key={item?.lessonId}
                 className="border-b border-gray-200 even:bg-slate-100 text-sm hover:bg-tableHover"
             >
-                <td className="flex items-center gap-4 p-3">{item?.subject}</td>
+                <td className="flex items-center gap-4 p-3">{item?.subject?.subjectName}</td>
                 <td>{item?.class?.name}</td>
                 <td className="hidden md:table-cell">{item?.teacher?.name}</td>
                 <td>
@@ -75,7 +75,11 @@ const LessonsListPage = async ({
             </tr>
         );
     };
-    const tableRender = () => {};
+    const filteredData = id
+        ? LessonsListTableData?.filter((d: Lessons) => d?.teacher?.teacherId === id)
+        : classId
+          ? LessonsListTableData.filter((c: Lessons) => c?.class?.classId === classId)
+          : LessonsListTableData;
     return (
         <div className="bg-white p-4 flex-1 rounded-md m-4 mt-0">
             {/* Top */}
@@ -104,24 +108,14 @@ const LessonsListPage = async ({
 
             {/* handling No data */}
 
-            {LessonsListTableData?.length === 0 && !id ? (
+            {filteredData?.length === 0 ? (
                 <div className="flex items-center justify-center text-black font-medium text-3xl mt-8">
                     <span>No Lessons List Found</span>
                 </div>
             ) : (
                 <>
                     {/* List */}
-                    <Table
-                        columns={headerColumns}
-                        renderRow={renderRow}
-                        data={
-                            id
-                                ? LessonsListTableData?.filter(
-                                      (d: any) => d?.teacher?.teacherId === id
-                                  )
-                                : LessonsListTableData
-                        }
-                    />
+                    <Table columns={headerColumns} renderRow={renderRow} data={filteredData} />
 
                     {/* Pagination */}
                     <div className="">

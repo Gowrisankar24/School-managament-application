@@ -21,10 +21,18 @@ export const teacherTableTypes = defineType({
             validation: Rule => Rule.required(),
         }),
         defineField({
+            name: 'username',
+            type: 'string',
+        }),
+        defineField({
+            name: 'password',
+            type: 'string',
+        }),
+        defineField({
             name: 'description',
             type: 'string',
             validation: Rule =>
-                Rule.min(3).max(200).error('Description must be atmost 60 character'),
+                Rule.min(3).max(500).error('Description must be atmost 200 character'),
         }),
         defineField({
             name: 'email',
@@ -34,7 +42,6 @@ export const teacherTableTypes = defineType({
         defineField({
             name: 'photo',
             type: 'url',
-            validation: Rule => Rule.required(),
         }),
         defineField({
             name: 'phone',
@@ -47,16 +54,27 @@ export const teacherTableTypes = defineType({
                     .error('Mobile number must be exactly 10 digits'),
         }),
         defineField({
+            name: 'sex',
+            type: 'string',
+            options: {
+                list: [
+                    { title: 'Male', value: 'Male' },
+                    { title: 'Female', value: 'Female' },
+                ],
+            },
+            validation: Rule => Rule.required(),
+        }),
+        defineField({
             name: 'subjects',
             type: 'array',
             of: [{ type: 'reference', to: [{ type: 'subject' }] }],
-            validation: Rule => Rule.required(),
+            // validation: Rule => Rule.required(),
         }),
         defineField({
             name: 'classes',
             type: 'array',
             of: [{ type: 'reference', to: [{ type: 'class' }] }],
-            validation: Rule => Rule.required(),
+            // validation: Rule => Rule.required(),
         }),
         defineField({
             name: 'address',
@@ -82,12 +100,13 @@ export const teacherTableTypes = defineType({
         defineField({
             name: 'branches',
             type: 'number',
-            validation: Rule => Rule.required(),
+            // validation: Rule => Rule.required(),
         }),
         defineField({
             name: 'lessons',
-            type: 'number',
-            validation: Rule => Rule.required(),
+            type: 'array',
+            of: [{ type: 'reference', to: [{ type: 'lesson' }] }],
+            // validation: Rule => Rule.required(),
         }),
         defineField({
             name: 'Performance',
@@ -127,14 +146,14 @@ export const teacherTableTypes = defineType({
                             title: 'Title',
                             type: 'reference',
                             to: [{ type: 'subject' }],
-                            validation: Rule => Rule.required(),
+                            // validation: Rule => Rule.required(),
                         }),
                         defineField({
                             name: 'class',
                             title: 'Class',
                             type: 'reference',
                             to: [{ type: 'class' }],
-                            validation: Rule => Rule.required(),
+                            // validation: Rule => Rule.required(),
                         }),
                         defineField({
                             name: 'start',
@@ -143,19 +162,24 @@ export const teacherTableTypes = defineType({
                             options: {
                                 timeFormat: 'HH:mm',
                             },
-                            validation: Rule => Rule.required(),
+                            // validation: Rule => Rule.required(),
                         }),
                         defineField({
                             name: 'end',
                             title: 'End Time',
                             type: 'datetime',
                             options: {
-                                // dateFormat: moment().format(),
                                 timeFormat: 'HH:mm',
                             },
-                            validation: Rule => Rule.required(),
+                            // validation: Rule => Rule.required(),
                         }),
                     ],
+                    preview: {
+                        select: {
+                            title: 'title.subjectName',
+                            subtitle: 'class.name',
+                        },
+                    },
                 },
             ],
         }),

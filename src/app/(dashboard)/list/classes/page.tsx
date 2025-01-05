@@ -84,6 +84,9 @@ const SubjectsListPage = async ({
             </tr>
         );
     };
+    const filteredClassListTableData = id
+        ? ClassListTableData.filter((d: any) => d?.supervisor?.teacherId === id)
+        : ClassListTableData;
     return (
         <div className="bg-white p-4 flex-1 rounded-md m-4 mt-0">
             {/* Top */}
@@ -110,20 +113,14 @@ const SubjectsListPage = async ({
                 </div>
             </div>
             {/* handling no data */}
-            {ClassListTableData?.length > 0 ? (
+            {filteredClassListTableData?.length > 0 ? (
                 <>
                     <>
                         {/* List */}
                         <Table
                             columns={headerColumns}
                             renderRow={renderRow}
-                            data={
-                                id
-                                    ? ClassListTableData.filter(
-                                          (d: any) => d?.supervisor?.teacherId === id
-                                      )
-                                    : ClassListTableData
-                            }
+                            data={filteredClassListTableData}
                         />
 
                         {!id && (

@@ -1,4 +1,5 @@
 export const role: string = 'admin';
+export const ITEMS_PER_PAGE = 10;
 
 export const calendarEvents = [
     {

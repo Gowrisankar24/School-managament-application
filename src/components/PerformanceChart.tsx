@@ -38,7 +38,7 @@ export const PerformanceChart = ({ chartData }: { chartData: string[] | number[]
             </ResponsiveContainer>
 
             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
-                <h1 className="text-3xl font-semibold">{getpercent(combinedVal, 100)}</h1>
+                <h1 className="text-3xl font-semibold">{getpercent(combinedVal, 200)}</h1>
                 <p className="text-xs text-gray-300">of max 10 score</p>
             </div>
             <h2 className="font-medium absolute bottom-20 left-0 right-0 text-center m-auto">

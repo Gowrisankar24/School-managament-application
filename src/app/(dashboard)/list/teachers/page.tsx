@@ -1,24 +1,26 @@
-import React from 'react';
-import { TableSearchCompo } from '@/components/TableSearchCompo';
+import React, { Suspense } from 'react';
 import { FaFilter, FaSortAmountDown, FaPlus, FaRegEye } from 'react-icons/fa';
 import { MdDeleteOutline } from 'react-icons/md';
-import { Pagination } from '@/components/Pagination';
-import { Table } from '@/components/Table';
 import Image from 'next/image';
 import Link from 'next/link';
-import { role, teachersListData } from '@/lib/data';
+import { ITEMS_PER_PAGE, role, teachersListData } from '@/lib/data';
 import { FormModal } from '@/components/FormModal';
-import { sanityFetch } from '@/sanity/lib/live';
 import { TEACHERS_LIST_QUERY } from '@/sanity/lib/queries';
+import { client } from '@/sanity/lib/client';
+import Table from '@/components/Table';
+import dynamic from 'next/dynamic';
+import TableSearchCompo from '@/components/TableSearchCompo';
+import Pagination from '@/components/Pagination';
 
-type Teacher = {
-    teacherId: number | string;
+export type Teacher = {
+    _id: string;
+    teacherId: string;
     name: string;
     email?: string;
     photo: string;
     phone: string;
     subjects: string[] | number[];
-    classes: string[] | number[];
+    classes: { classId: string }[];
     address: string;
 };
 
@@ -58,8 +60,27 @@ const headerColumns = [
     },
 ];
 
-const TeachersListPage = async () => {
-    const { data: TeachersListTableData } = await sanityFetch({ query: TEACHERS_LIST_QUERY });
+const TeachersListPage = async ({
+    searchParams,
+}: {
+    searchParams: Promise<{ [key: string]: string | undefined }>;
+}) => {
+    const { classId: classIdQueryParams, page } = await searchParams;
+    const p = page ? parseInt(page) : 1;
+    const query = TEACHERS_LIST_QUERY(p, ITEMS_PER_PAGE);
+    const TeachersListTableData = await client.fetch(query);
+
+    //filter table data
+    const FilteredTableData = classIdQueryParams
+        ? TeachersListTableData?.map((d: Teacher) => {
+              return {
+                  ...d,
+                  classes: d.classes.filter(cls => cls.classId === classIdQueryParams),
+              };
+          })
+        : TeachersListTableData;
+    //
+
     const renderRow = (item: Teacher) => {
         return (
             <tr
@@ -68,7 +89,7 @@ const TeachersListPage = async () => {
             >
                 <td className="flex items-center gap-4 p-3">
                     <Image
-                        src={item?.photo}
+                        src={item?.photo || `/profile.png`}
                         alt=""
                         width={40}
                         height={40}
@@ -87,7 +108,7 @@ const TeachersListPage = async () => {
                 </td>
                 <td className="hidden md:table-cell">
                     {Object.values(item?.classes)
-                        ?.map(d => d.name)
+                        ?.map((d: any) => d.name)
                         .join(',')}
                 </td>
                 <td className="hidden lg:table-cell">{item?.phone}</td>
@@ -103,7 +124,7 @@ const TeachersListPage = async () => {
                             <FormModal
                                 table="teacher"
                                 type="delete"
-                                id={item?.teacherId}
+                                id={item?._id}
                                 icon={<MdDeleteOutline className="text-lg" />}
                             />
                         )}
@@ -112,13 +133,36 @@ const TeachersListPage = async () => {
             </tr>
         );
     };
+    const uniquesClasses = FilteredTableData?.flatMap((data: Teacher) => data?.classes)?.reduce(
+        (acc: { _id: string; name: string }[], { _id, name }: { _id: string; name: string }) => {
+            if (!acc?.some(item => item?._id == _id)) {
+                acc?.push({ _id, name });
+            }
+            return acc;
+        },
+        []
+    );
+    const getUniqueSubjects = FilteredTableData?.flatMap((data: Teacher) => data?.subjects)?.reduce(
+        (
+            acc: { _id: string; subjectName: string }[],
+            { _id, subjectName }: { _id: string; subjectName: string }
+        ) => {
+            if (!acc?.some(item => item?._id == _id)) {
+                acc?.push({ _id, subjectName });
+            }
+            return acc;
+        },
+        []
+    );
     return (
         <div className="bg-white p-4 flex-1 rounded-md m-4 mt-0">
             {/* Top */}
             <div className="flex justify-between items-center">
                 <h1 className="hidden md:block text-lg font-semibold">All Teachers</h1>
                 <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
+                    {/* <Suspense fallback={<h1>Loading TableSearchCompo...</h1>}> */}
                     <TableSearchCompo />
+                    {/* </Suspense> */}
                     <div className="flex items-center gap-4 self-end">
                         <button className="flex items-center justify-center rounded-full bg-lightYellow p-3">
                             <FaFilter className="text-[15px]" />
@@ -131,25 +175,33 @@ const TeachersListPage = async () => {
                                 table="teacher"
                                 type="create"
                                 icon={<FaPlus className="text-[15px]" />}
+                                dropdownClsData={uniquesClasses}
+                                dropdownSubsData={getUniqueSubjects}
                             />
                         )}
                     </div>
                 </div>
             </div>
             {/* handling no data */}
-            {TeachersListTableData?.length > 0 ? (
+            {FilteredTableData?.length > 0 ? (
                 <>
+                    {/* <Suspense fallback={<div>Loading...</div>}> */}
                     {/* List */}
-                    <Table
-                        columns={headerColumns}
-                        renderRow={renderRow}
-                        data={TeachersListTableData}
-                    />
+                    <Table columns={headerColumns} renderRow={renderRow} data={FilteredTableData} />
 
-                    {/* Pagination */}
-                    <div className="">
-                        <Pagination />
-                    </div>
+                    {TeachersListTableData[0]?.totalCount > 10 && (
+                        <>
+                            {/* Pagination */}
+
+                            <div className="">
+                                <Pagination
+                                    page={p}
+                                    totalCount={TeachersListTableData[0]?.totalCount}
+                                />
+                            </div>
+                        </>
+                    )}
+                    {/* </Suspense> */}
                 </>
             ) : (
                 <div className="flex items-center justify-center text-black font-medium text-3xl mt-8">

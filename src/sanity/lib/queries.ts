@@ -1,7 +1,8 @@
 import { defineQuery } from 'next-sanity';
 
-export const TEACHERS_LIST_QUERY = defineQuery(`
-*[_type == 'teacher'] | order(_createdAt desc){
+export const TEACHERS_LIST_QUERY = (page: number, pageSize: number) =>
+    defineQuery(`
+*[_type == 'teacher'] | order(_createdAt desc)[${(page - 1) * pageSize}..${page * pageSize - 1}]{
  _id,
  _createdAt,
 teacherId,
@@ -10,16 +11,20 @@ email,
 photo,
 phone,
 subjects[] -> {
+_id,
 subjectId,
 subjectName
 },
 classes[] -> {
+_id,
 classId,
 name,
 capacity,
 grade,
 },
-address
+address,
+"totalCount":count(*[_type == 'teacher']),
+"page": ${page}
 }`);
 
 export const STUDENTS_LIST_QUERY = defineQuery(`
@@ -82,7 +87,10 @@ export const LESSONS_LIST_QUERY = defineQuery(`
 _id,
 _createdAt,
 lessonId,
-subject,
+subject -> {
+   subjectId,
+   subjectName
+},
 class->{
 classId,
 name,
@@ -107,6 +115,7 @@ subjectId,
 subjectName
 },
 class->{
+classId,
 name,
 capacity,
 grade,
@@ -225,36 +234,77 @@ export const TEACHERS_INFO_BY_ID = defineQuery(`
       email,
       photo,
       phone,
+      username,
+      password,
       subjects[] -> {
-        subjectId,
-        subjectName
+          _id,
+          subjectId,
+          subjectName
       },
       classes[] -> {
-        classId,
-        name,
-        supervisor ->{
-         teacherId,
-         name,
-        }
+          _id,
+          classId,
+          name,
+          supervisor ->{
+            teacherId,
+            name,
+          },
       },
       address,
       dob,
       bloodType,
       attendance,
       branches,
-      lessons,
+     "teacherlessonCount": count(lessons),
       Performance,
       ScheduleTime[]| order(start asc){
-      start,
-      end,
-      class ->{
-       name,
-      },
-      title -> {
+        start,
+        end,
+        class ->{
+           name,
+        },
+        title -> {
           subjectName
-      },
+        },
       },
       "relatedAnnouncementTop3": *[_type == 'announcement' && teacher._ref == ^._id]|order(date desc) [0..3]{_id,title,description,date},
       "relatedAnnouncements": *[_type == 'announcement' && teacher._ref == ^._id] | order(date desc){_id,title,description,date}
    }
+`);
+
+export const STUDENTS_INFO_BY_ID = defineQuery(`
+  *[_type == 'student' && studentId == $id][0]{
+      _id,
+      _createdAt,
+      studentId,
+      name,
+      description,
+      email,
+      photo,
+      phone,
+      grade,
+      class -> {
+          _id,
+          classId,
+          name,
+          capacity,
+          grade,
+          supervisor->{
+            teacherId,
+            name,
+          },
+          "studentInfoAnnouncementTop3" : *[_type == 'announcement' && class._ref == ^._id]| order(date desc){
+               _id,title,description,date
+            },
+          "studentInfoAnnouncement" : *[_type == 'announcement' && class._ref == ^._id]| order(date desc){
+              _id,title,description,date
+            },
+      },
+      address,
+      dob,
+      bloodType,
+      attendance,
+      "studentLessonCount": count(lessons),
+      Performance,
+    }
 `);
