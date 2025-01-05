@@ -25,7 +25,10 @@ export const Announcements = ({
             <div className="flex flex-col gap-4">
                 {top3Data?.map((d: any, index: number) => {
                     return (
-                        <div className={`${ANNOUNCEMENT_COLORS[index]} rounded-md p-4`}>
+                        <div
+                            className={`${ANNOUNCEMENT_COLORS[index]} rounded-md p-4`}
+                            key={d?._id}
+                        >
                             <div className="flex justify-between items-center">
                                 <h2 className="font-medium">{d?.title}</h2>
                                 <span className="bg-white px-2 py-1 rounded-md text-xs text-gray-400">

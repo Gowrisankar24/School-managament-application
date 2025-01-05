@@ -139,9 +139,9 @@ export const Menu = () => {
                     <summary className="hidden lg:block text-lightSky font-medium my-2 ">
                         {i?.title}
                     </summary>
-                    {i?.items?.map(d => {
-                        if (d?.visible?.includes(role)) {
-                            return (
+                    {i?.items?.map(d =>
+                        role ? (
+                            d?.visible?.includes(role) && (
                                 <Link
                                     href={d?.href}
                                     key={d?.label}
@@ -150,9 +150,11 @@ export const Menu = () => {
                                     <span className="text-2xl">{d?.icon}</span>
                                     <span className="hidden lg:block">{d?.label}</span>
                                 </Link>
-                            );
-                        }
-                    })}
+                            )
+                        ) : (
+                            <div>Loading...</div>
+                        )
+                    )}
                 </details>
             ))}
         </div>

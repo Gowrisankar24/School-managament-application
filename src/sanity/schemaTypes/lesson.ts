@@ -16,7 +16,8 @@ export const lessonsTableTypes = defineType({
         }),
         defineField({
             name: 'subject',
-            type: 'string',
+            type: 'reference',
+            to: [{ type: 'subject' }],
             validation: Rule => Rule.required(),
         }),
         defineField({
@@ -39,4 +40,10 @@ export const lessonsTableTypes = defineType({
             ],
         }),
     ],
+    preview: {
+        select: {
+            title: 'subject.subjectName',
+            subtitle: 'teacher.name',
+        },
+    },
 });

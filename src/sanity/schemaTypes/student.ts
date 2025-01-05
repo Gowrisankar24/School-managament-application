@@ -25,6 +25,12 @@ export const StudentTableTypes = defineType({
             validation: Rule => Rule.required(),
         }),
         defineField({
+            name: 'description',
+            type: 'string',
+            validation: Rule =>
+                Rule.min(3).max(200).error('Description must be atmost 200 character'),
+        }),
+        defineField({
             name: 'photo',
             type: 'url',
             validation: Rule => Rule.required(),
@@ -56,5 +62,95 @@ export const StudentTableTypes = defineType({
             type: 'string',
             validation: Rule => Rule.required(),
         }),
+        defineField({
+            name: 'bloodType',
+            type: 'string',
+            validation: Rule => Rule.required(),
+        }),
+        defineField({
+            name: 'dob',
+            type: 'date',
+            validation: Rule => Rule.required(),
+        }),
+        defineField({
+            name: 'attendance',
+            type: 'string',
+            validation: Rule =>
+                Rule.regex(/[0-9]*\.?[0-9]+%/g).error('Value must be added with % symbol'),
+        }),
+        defineField({
+            name: 'lessons',
+            type: 'array',
+            of: [{ type: 'reference', to: [{ type: 'lesson' }] }],
+        }),
+        defineField({
+            name: 'Performance',
+            type: 'array',
+            of: [
+                {
+                    name: 'Performancecharts',
+                    type: 'document',
+                    fields: [
+                        {
+                            name: 'name',
+                            type: 'string',
+                            validation: Rule => Rule.required(),
+                        },
+                        {
+                            name: 'value',
+                            type: 'number',
+                            validation: Rule => Rule.required(),
+                        },
+                    ],
+                },
+            ],
+        }),
+        // defineField({
+        //     name: 'ScheduleTime',
+        //     title: 'Period Timings(Student)',
+        //     type: 'array',
+        //     of: [
+        //         {
+        //             name: 'Duration',
+        //             title: 'Time  Period Duration',
+        //             description: 'Please Select start and end time',
+        //             type: 'object',
+        //             fields: [
+        //                 defineField({
+        //                     name: 'title',
+        //                     title: 'Title',
+        //                     type: 'reference',
+        //                     to: [{ type: 'subject' }],
+        //                     validation: Rule => Rule.required(),
+        //                 }),
+        //                 defineField({
+        //                     name: 'class',
+        //                     title: 'Class',
+        //                     type: 'reference',
+        //                     to: [{ type: 'class' }],
+        //                     validation: Rule => Rule.required(),
+        //                 }),
+        //                 defineField({
+        //                     name: 'start',
+        //                     title: 'Start Time',
+        //                     type: 'datetime',
+        //                     options: {
+        //                         timeFormat: 'HH:mm',
+        //                     },
+        //                     validation: Rule => Rule.required(),
+        //                 }),
+        //                 defineField({
+        //                     name: 'end',
+        //                     title: 'End Time',
+        //                     type: 'datetime',
+        //                     options: {
+        //                         timeFormat: 'HH:mm',
+        //                     },
+        //                     validation: Rule => Rule.required(),
+        //                 }),
+        //             ],
+        //         },
+        //     ],
+        // }),
     ],
 });

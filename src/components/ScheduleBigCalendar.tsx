@@ -28,25 +28,35 @@ export const ScheduleBigCalendar = ({ scheduleData }: { scheduleData: ScheduleDa
         setView(selectedView);
     };
     return (
-        <Calendar
-            localizer={localizer}
-            events={EventData}
-            startAccessor="start"
-            endAccessor="end"
-            view={view}
-            step={45}
-            timeslots={1}
-            className="!overflow-x-hidden"
-            views={['work_week', 'day']}
-            style={{ height: '98%' }}
-            onView={handleChangeView}
-            defaultDate={moment(scheduleData[0]?.start).toDate()}
-            min={moment(scheduleData[0]?.start || new Date())
-                .set({ hour: 9, minute: 0 })
-                .toDate()}
-            max={moment(scheduleData[0]?.start || new Date())
-                .set({ hour: 16, minute: 0 })
-                .toDate()}
-        />
+        <>
+            {scheduleData?.length > 0 ? (
+                <Calendar
+                    localizer={localizer}
+                    events={EventData}
+                    startAccessor="start"
+                    endAccessor="end"
+                    view={view}
+                    step={45}
+                    timeslots={1}
+                    className="!overflow-x-hidden"
+                    views={['work_week', 'day']}
+                    style={{ height: '98%' }}
+                    onView={handleChangeView}
+                    defaultDate={moment(scheduleData[0]?.start).toDate()}
+                    min={moment(scheduleData[0]?.start || new Date())
+                        .set({ hour: 9, minute: 0 })
+                        .toDate()}
+                    max={moment(scheduleData[0]?.start || new Date())
+                        .set({ hour: 16, minute: 0 })
+                        .toDate()}
+                />
+            ) : (
+                <div className="flex flex-1 justify-center">
+                    <span className="text-gray-800 items-center">
+                        No Schedule has been allotted
+                    </span>
+                </div>
+            )}
+        </>
     );
 };

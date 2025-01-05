@@ -46,10 +46,15 @@ const headerColumns = [
 const ExamsListPage = async ({
     searchParams,
 }: {
-    searchParams: Promise<{ teacherId: string }>;
+    searchParams: Promise<{ teacherId?: string; classId?: string }>;
 }) => {
-    const id = (await searchParams).teacherId;
+    const { teacherId: id, classId: searchparamClassId } = await searchParams;
     const { data: examListTableData } = await sanityFetch({ query: EXAMS_LIST_QUERY });
+    const FilteredTableData = id
+        ? examListTableData?.filter((d: Exams) => d?.teacher?.teacherId == id)
+        : searchparamClassId
+          ? examListTableData?.filter((d: Exams) => d?.class?.classId == searchparamClassId)
+          : examListTableData;
     const renderRow = (item: Exams) => {
         return (
             <tr
@@ -110,18 +115,10 @@ const ExamsListPage = async ({
             </div>
             {/* handling no data */}
 
-            {examListTableData?.length > 0 ? (
+            {FilteredTableData?.length > 0 ? (
                 <>
                     {/* List */}
-                    <Table
-                        columns={headerColumns}
-                        renderRow={renderRow}
-                        data={
-                            id
-                                ? examListTableData?.filter((d: any) => d?.teacher?.teacherId == id)
-                                : examListTableData
-                        }
-                    />
+                    <Table columns={headerColumns} renderRow={renderRow} data={FilteredTableData} />
 
                     {/* Pagination */}
                     <div className="">

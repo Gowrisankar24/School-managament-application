@@ -1,7 +1,8 @@
+'use client';
 import React from 'react';
 import { CiSearch } from 'react-icons/ci';
 
-export const TableSearchCompo = () => {
+const TableSearchCompo = () => {
     return (
         <div className="w-full flex md:w-auto items-center gap-2 text-xs rounded-full ring-[1.5px] ring-gray-300 px-2">
             <CiSearch className="text-lg" />
@@ -13,3 +14,5 @@ export const TableSearchCompo = () => {
         </div>
     );
 };
+
+export default TableSearchCompo;

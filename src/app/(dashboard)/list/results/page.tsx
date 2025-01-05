@@ -58,8 +58,17 @@ const headerColumns = [
     },
 ];
 
-const ResultsListPage = async () => {
+const ResultsListPage = async ({
+    searchParams,
+}: {
+    searchParams: Promise<{ studentId?: string }>;
+}) => {
+    const { studentId: searchParamStudentId } = await searchParams;
     const { data: ResultListTableData } = await sanityFetch({ query: RESULTS_LIST_QUERY });
+    //filter table data
+    const FilterTableData = searchParamStudentId
+        ? ResultListTableData?.filter((d: Reults) => d.student?.studentId === searchParamStudentId)
+        : ResultListTableData;
     const renderRow = (item: Reults) => {
         return (
             <tr
@@ -121,14 +130,10 @@ const ResultsListPage = async () => {
                 </div>
             </div>
             {/* handling no Data */}
-            {ResultListTableData?.length > 0 ? (
+            {FilterTableData?.length > 0 ? (
                 <>
                     {/* List */}
-                    <Table
-                        columns={headerColumns}
-                        renderRow={renderRow}
-                        data={ResultListTableData}
-                    />
+                    <Table columns={headerColumns} renderRow={renderRow} data={FilterTableData} />
 
                     {/* Pagination */}
                     <div className="">

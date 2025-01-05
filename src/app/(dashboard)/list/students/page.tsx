@@ -55,7 +55,7 @@ const headerColumns = [
 const StudentListPage = async ({
     searchParams,
 }: {
-    searchParams: Promise<{ teacherId: string }>;
+    searchParams: Promise<{ teacherId?: string }>;
 }) => {
     const { data: StudentsTableData } = await sanityFetch({ query: STUDENTS_LIST_QUERY });
     const id = (await searchParams).teacherId;
@@ -84,7 +84,7 @@ const StudentListPage = async ({
                 <td className="hidden lg:table-cell">{item?.address}</td>
                 <td>
                     <div className="flex items-center gap-2">
-                        <Link href={`/list/teachers/${item?.studentId}`}>
+                        <Link href={`/list/students/${item?.studentId}`}>
                             <button className="flex items-center justify-center rounded-full p-2 bg-lightSky">
                                 <FaRegEye className="text-lg" />
                             </button>
