@@ -1,15 +1,24 @@
 import React from 'react';
 import { FaFilter, FaPlus, FaEdit, FaSortAmountDown } from 'react-icons/fa';
 import { MdDeleteOutline } from 'react-icons/md';
-import { announcementsData, role } from '@/lib/data';
-import { TableSearchCompo } from '@/components/TableSearchCompo';
-import { Table } from '@/components/Table';
-import { Pagination } from '@/components/Pagination';
+import { announcementsData, ITEMS_PER_PAGE, role } from '@/lib/data';
+import TableSearchCompo from '@/components/TableSearchCompo';
+import Table from '@/components/Table';
+import Pagination from '@/components/Pagination';
 import { FormModal } from '@/components/FormModal';
 import { sanityFetch } from '@/sanity/lib/live';
-import { ANNOUNCEMENTS_LIST_QUERY } from '@/sanity/lib/queries';
+import {
+    ANNOUNCEMENTS_LIST_COUNT_ALL,
+    ANNOUNCEMENTS_LIST_QUERY,
+    CLASS_LIST_QUERY,
+    CLASS_LIST_QUERY_ALL_COUNT,
+    TEACHERS_LIST_ALL_COUNT,
+    TEACHERS_LIST_QUERY,
+} from '@/sanity/lib/queries';
+import { client } from '@/sanity/lib/client';
 
 type Announcement = {
+    _id: string;
     announcementId: number;
     title: string;
     class: { [key: string]: string | number };
@@ -37,10 +46,45 @@ const headerColumns = [
     },
 ];
 
-const AnnouncementsListPage = async () => {
-    const { data: AnnouncementListTableData } = await sanityFetch({
-        query: ANNOUNCEMENTS_LIST_QUERY,
-    });
+const AnnouncementsListPage = async ({
+    searchParams,
+}: {
+    searchParams: Promise<{ [key: string]: string | undefined }>;
+}) => {
+    const { page } = await searchParams;
+    const p = page ? parseInt(page) : 1;
+    const [getTotalClsCount, TeachersListTotalCount] = await Promise.all([
+        client.fetch(CLASS_LIST_QUERY_ALL_COUNT),
+        client.fetch(TEACHERS_LIST_ALL_COUNT),
+    ]);
+    const [
+        AnnouncementListTableData,
+        totalAssignmentList,
+        getClassesListTableData,
+        TeachersTableList,
+    ] = await Promise.all([
+        client.fetch(ANNOUNCEMENTS_LIST_QUERY, {
+            start: (p - 1) * ITEMS_PER_PAGE,
+            limit: ITEMS_PER_PAGE,
+        }),
+        client.fetch(ANNOUNCEMENTS_LIST_COUNT_ALL),
+        client.fetch(CLASS_LIST_QUERY, {
+            start: (p - 1) * ITEMS_PER_PAGE,
+            limit: getTotalClsCount,
+        }),
+        client.fetch(TEACHERS_LIST_QUERY, {
+            start: (p - 1) * ITEMS_PER_PAGE,
+            limit: TeachersListTotalCount,
+        }),
+    ]);
+    const uniqueClasses = getClassesListTableData?.map((d: { [key: string]: string | number }) => ({
+        _id: d?._id,
+        name: d?.name,
+    }));
+    const getTeachersNameList = TeachersTableList?.map((d: { [key: string]: string }) => ({
+        _id: d?._id,
+        name: d?.name,
+    }));
     const renderRow = (item: Announcement) => {
         return (
             <tr
@@ -59,11 +103,13 @@ const AnnouncementsListPage = async () => {
                                     type="update"
                                     data={item}
                                     icon={<FaEdit className="text-sm" />}
+                                    dropdownClsData={uniqueClasses}
+                                    dropDownTeacherList={getTeachersNameList}
                                 />
                                 <FormModal
                                     table="announcement"
                                     type="delete"
-                                    id={item?.announcementId}
+                                    id={item?._id}
                                     icon={<MdDeleteOutline className="text-lg" />}
                                 />
                             </>
@@ -93,6 +139,8 @@ const AnnouncementsListPage = async () => {
                                 table="announcement"
                                 type="create"
                                 icon={<FaPlus className="text-[15px]" />}
+                                dropdownClsData={uniqueClasses}
+                                dropDownTeacherList={getTeachersNameList}
                             />
                         )}
                     </div>
@@ -111,7 +159,7 @@ const AnnouncementsListPage = async () => {
 
                     {/* Pagination */}
                     <div className="">
-                        <Pagination />
+                        <Pagination page={p} totalCount={totalAssignmentList} />
                     </div>
                 </>
             ) : (

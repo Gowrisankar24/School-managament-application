@@ -1,16 +1,24 @@
 import { FormModal } from '@/components/FormModal';
-import { Pagination } from '@/components/Pagination';
-import { Table } from '@/components/Table';
-import { TableSearchCompo } from '@/components/TableSearchCompo';
-import { role, studentsListData } from '@/lib/data';
-import { sanityFetch } from '@/sanity/lib/live';
-import { STUDENTS_LIST_QUERY } from '@/sanity/lib/queries';
+import Pagination from '@/components/Pagination';
+import Table from '@/components/Table';
+import TableSearchCompo from '@/components/TableSearchCompo';
+import { ITEMS_PER_PAGE, role, studentsListData } from '@/lib/data';
+import { client } from '@/sanity/lib/client';
+import {
+    CLASS_LIST_QUERY,
+    CLASS_LIST_QUERY_ALL_COUNT,
+    STUDENTS_LIST_ALL_COUNT,
+    STUDENTS_LIST_QUERY,
+    SUBJECTS_LIST_ALL_COUNT,
+    SUBJECTS_LIST_QUERY,
+} from '@/sanity/lib/queries';
 import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
 import { FaFilter, FaPlus, FaRegEye, FaSortAmountDown } from 'react-icons/fa';
 import { MdDeleteOutline } from 'react-icons/md';
 type Student = {
+    _id: string;
     studentId: string;
     name: string;
     email?: string;
@@ -19,6 +27,7 @@ type Student = {
     grade: number;
     class: { [key: string]: string | number };
     address: string;
+    subjects: string[] | number[];
 };
 
 const headerColumns = [
@@ -55,10 +64,54 @@ const headerColumns = [
 const StudentListPage = async ({
     searchParams,
 }: {
-    searchParams: Promise<{ teacherId?: string }>;
+    searchParams: Promise<{ [key: string]: string | undefined }>;
 }) => {
-    const { data: StudentsTableData } = await sanityFetch({ query: STUDENTS_LIST_QUERY });
-    const id = (await searchParams).teacherId;
+    const { teacherId: id, page } = await searchParams;
+    const p = page ? parseInt(page) : 1;
+    const [getTotalClsCount, getTotalSubCount] = await Promise.all([
+        client.fetch(CLASS_LIST_QUERY_ALL_COUNT),
+        client.fetch(SUBJECTS_LIST_ALL_COUNT),
+    ]);
+    const [
+        StudentsTableData,
+        StudentTotalCount,
+        getClassesListTableData,
+        getSubjectsListTableData,
+    ] = await Promise.all([
+        client.fetch(STUDENTS_LIST_QUERY, {
+            start: (p - 1) * ITEMS_PER_PAGE,
+            limit: ITEMS_PER_PAGE,
+        }),
+        client.fetch(STUDENTS_LIST_ALL_COUNT),
+        client.fetch(CLASS_LIST_QUERY, {
+            start: (p - 1) * ITEMS_PER_PAGE,
+            limit: getTotalClsCount,
+        }),
+        client.fetch(SUBJECTS_LIST_QUERY, {
+            start: (p - 1) * ITEMS_PER_PAGE,
+            limit: getTotalSubCount,
+        }),
+    ]);
+    //filter students data
+    const filteredStudentTableData = id
+        ? StudentsTableData?.filter(
+              (d: { [key: string]: any }) => d?.class?.supervisor?.teacherId === id
+          )
+        : StudentsTableData;
+
+    const getUniqueSubjects = getSubjectsListTableData?.map(
+        (d: { [key: string]: string | number }) => ({
+            _id: d?._id,
+            subjectName: d?.subjectName,
+        })
+    );
+
+    const uniquesClasses = getClassesListTableData?.map(
+        (d: { [key: string]: string | number }) => ({
+            _id: d?._id,
+            name: d?.name,
+        })
+    );
     const renderRow = (item: Student) => {
         return (
             <tr
@@ -67,7 +120,7 @@ const StudentListPage = async ({
             >
                 <td className="flex items-center gap-4 p-3">
                     <Image
-                        src={item?.photo}
+                        src={item?.photo || `/profile.png`}
                         alt=""
                         width={40}
                         height={40}
@@ -93,7 +146,7 @@ const StudentListPage = async ({
                             <FormModal
                                 table="student"
                                 type="delete"
-                                id={item?.studentId}
+                                id={item?._id}
                                 icon={<MdDeleteOutline className="text-lg" />}
                             />
                         )}
@@ -122,6 +175,8 @@ const StudentListPage = async ({
                                 table="student"
                                 type="create"
                                 icon={<FaPlus className="text-[15px]" />}
+                                dropdownSubsData={getUniqueSubjects}
+                                dropdownClsData={uniquesClasses}
                             />
                         )}
                     </div>
@@ -129,24 +184,18 @@ const StudentListPage = async ({
             </div>
 
             {/* handling no data */}
-            {StudentsTableData?.length > 0 ? (
+            {filteredStudentTableData?.length > 0 ? (
                 <>
                     {/* List */}
                     <Table
                         columns={headerColumns}
                         renderRow={renderRow}
-                        data={
-                            id
-                                ? StudentsTableData?.filter(
-                                      (d: any) => d?.class?.supervisor?.teacherId === id
-                                  )
-                                : StudentsTableData
-                        }
+                        data={filteredStudentTableData}
                     />
 
                     {/* Pagination */}
                     <div className="">
-                        <Pagination />
+                        <Pagination page={p} totalCount={StudentTotalCount} />
                     </div>
                 </>
             ) : (

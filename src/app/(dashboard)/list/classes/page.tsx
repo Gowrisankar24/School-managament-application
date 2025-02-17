@@ -1,15 +1,21 @@
 import React from 'react';
 import { FaFilter, FaPlus, FaEdit, FaSortAmountDown } from 'react-icons/fa';
-import { classesListData, role } from '@/lib/data';
+import { classesListData, ITEMS_PER_PAGE, role } from '@/lib/data';
 import { MdDeleteOutline } from 'react-icons/md';
-import { TableSearchCompo } from '@/components/TableSearchCompo';
-import { Table } from '@/components/Table';
-import { Pagination } from '@/components/Pagination';
+import TableSearchCompo from '@/components/TableSearchCompo';
+import Table from '@/components/Table';
+import Pagination from '@/components/Pagination';
 import { FormModal } from '@/components/FormModal';
-import { sanityFetch } from '@/sanity/lib/live';
-import { CLASS_LIST_QUERY } from '@/sanity/lib/queries';
+import {
+    CLASS_LIST_QUERY,
+    CLASS_LIST_QUERY_ALL_COUNT,
+    TEACHERS_LIST_ALL_COUNT,
+    TEACHERS_LIST_QUERY,
+} from '@/sanity/lib/queries';
+import { client } from '@/sanity/lib/client';
 
 type Classes = {
+    _id: string;
     classId: string;
     name: string;
     capacity: number;
@@ -46,10 +52,26 @@ const headerColumns = [
 const SubjectsListPage = async ({
     searchParams,
 }: {
-    searchParams: Promise<{ supervisorId: string }>;
+    searchParams: Promise<{ [key: string]: string | undefined }>;
 }) => {
-    const { data: ClassListTableData } = await sanityFetch({ query: CLASS_LIST_QUERY });
-    const id = (await searchParams).supervisorId;
+    const { supervisorId: id, classId: searchClassId, page } = await searchParams;
+    const p = page ? parseInt(page) : 1;
+    const TeachersListTotalCount = await client.fetch(TEACHERS_LIST_ALL_COUNT);
+    const [ClassListTableData, classTotalCount, TeachersTableList] = await Promise.all([
+        client.fetch(CLASS_LIST_QUERY, {
+            start: (p - 1) * ITEMS_PER_PAGE,
+            limit: ITEMS_PER_PAGE,
+        }),
+        client.fetch(CLASS_LIST_QUERY_ALL_COUNT),
+        client.fetch(TEACHERS_LIST_QUERY, {
+            start: (p - 1) * ITEMS_PER_PAGE,
+            limit: TeachersListTotalCount,
+        }),
+    ]);
+    const getTeachersNameList = TeachersTableList?.map((d: { [key: string]: string }) => ({
+        _id: d?._id,
+        name: d?.name,
+    }));
     const renderRow = (item: Classes) => {
         return (
             <tr
@@ -70,11 +92,12 @@ const SubjectsListPage = async ({
                                     type="update"
                                     data={item}
                                     icon={<FaEdit className="text-sm" />}
+                                    dropDownTeacherList={getTeachersNameList}
                                 />
                                 <FormModal
                                     table="class"
                                     type="delete"
-                                    id={item?.classId}
+                                    id={item?._id}
                                     icon={<MdDeleteOutline className="text-lg" />}
                                 />
                             </>
@@ -86,7 +109,12 @@ const SubjectsListPage = async ({
     };
     const filteredClassListTableData = id
         ? ClassListTableData.filter((d: any) => d?.supervisor?.teacherId === id)
-        : ClassListTableData;
+        : searchClassId
+          ? ClassListTableData?.filter(
+                (d: { [key: string]: string | number }) => d?.classId === searchClassId
+            )
+          : ClassListTableData;
+    console.log('ClassListTableData', ClassListTableData);
     return (
         <div className="bg-white p-4 flex-1 rounded-md m-4 mt-0">
             {/* Top */}
@@ -107,6 +135,7 @@ const SubjectsListPage = async ({
                                 table="class"
                                 type="create"
                                 icon={<FaPlus className="text-[15px]" />}
+                                dropDownTeacherList={getTeachersNameList}
                             />
                         )}
                     </div>
@@ -127,7 +156,7 @@ const SubjectsListPage = async ({
                             <>
                                 {/* Pagination */}
                                 <div className="">
-                                    <Pagination />
+                                    <Pagination page={p} totalCount={classTotalCount} />
                                 </div>
                             </>
                         )}

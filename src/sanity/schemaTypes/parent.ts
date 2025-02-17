@@ -20,15 +20,21 @@ export const parentTableTypes = defineType({
             validation: Rule => Rule.required(),
         }),
         defineField({
-            name: 'students',
-            type: 'array',
-            of: [{ type: 'reference', to: { type: 'student' } }],
-            validation: Rule => Rule.required(),
+            name: 'username',
+            type: 'string',
         }),
         defineField({
             name: 'email',
             type: 'string',
             validation: Rule => Rule.required(),
+        }),
+        defineField({
+            name: 'password',
+            type: 'string',
+        }),
+        defineField({
+            name: 'photo',
+            type: 'url',
         }),
         defineField({
             name: 'phone',
@@ -43,6 +49,23 @@ export const parentTableTypes = defineType({
         defineField({
             name: 'address',
             type: 'string',
+            validation: Rule => Rule.required(),
+        }),
+        defineField({
+            name: 'sex',
+            type: 'string',
+            options: {
+                list: [
+                    { title: 'Male', value: 'Male' },
+                    { title: 'Female', value: 'Female' },
+                ],
+            },
+            validation: Rule => Rule.required(),
+        }),
+        defineField({
+            name: 'students',
+            type: 'array',
+            of: [{ type: 'reference', to: { type: 'student' } }],
             validation: Rule => Rule.required(),
         }),
     ],

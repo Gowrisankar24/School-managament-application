@@ -1,3 +1,4 @@
+import moment from 'moment';
 import { defineField, defineType } from 'sanity';
 
 export const eventsTableListTypes = defineType({
@@ -38,8 +39,7 @@ export const eventsTableListTypes = defineType({
             name: 'startTime',
             type: 'datetime',
             options: {
-                timeFormat: 'HH:mm',
-                // timeStep: 30,
+                timeFormat: moment().format('HH:mm'),
             },
             validation: Rule => Rule.required(),
         }),
@@ -48,9 +48,13 @@ export const eventsTableListTypes = defineType({
             type: 'datetime',
             options: {
                 timeFormat: 'HH:mm',
-                // timeStep: 30,
             },
             validation: Rule => Rule.required(),
+        }),
+        defineField({
+            name: 'description',
+            type: 'string',
+            validation: Rule => Rule.max(600).required(),
         }),
     ],
     preview: {

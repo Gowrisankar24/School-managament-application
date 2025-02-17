@@ -20,9 +20,17 @@ export const StudentTableTypes = defineType({
             validation: Rule => Rule.required(),
         }),
         defineField({
+            name: 'username',
+            type: 'string',
+        }),
+        defineField({
             name: 'email',
             type: 'string',
             validation: Rule => Rule.required(),
+        }),
+        defineField({
+            name: 'password',
+            type: 'string',
         }),
         defineField({
             name: 'description',
@@ -31,9 +39,12 @@ export const StudentTableTypes = defineType({
                 Rule.min(3).max(200).error('Description must be atmost 200 character'),
         }),
         defineField({
+            name: 'nationality',
+            type: 'string',
+        }),
+        defineField({
             name: 'photo',
             type: 'url',
-            validation: Rule => Rule.required(),
         }),
         defineField({
             name: 'phone',
@@ -44,6 +55,17 @@ export const StudentTableTypes = defineType({
                         name: 'phone number',
                     })
                     .error('Mobile number must be exactly 10 digits'),
+        }),
+        defineField({
+            name: 'sex',
+            type: 'string',
+            options: {
+                list: [
+                    { title: 'Male', value: 'Male' },
+                    { title: 'Female', value: 'Female' },
+                ],
+            },
+            validation: Rule => Rule.required(),
         }),
         defineField({
             name: 'grade',
@@ -79,9 +101,9 @@ export const StudentTableTypes = defineType({
                 Rule.regex(/[0-9]*\.?[0-9]+%/g).error('Value must be added with % symbol'),
         }),
         defineField({
-            name: 'lessons',
+            name: 'subjects',
             type: 'array',
-            of: [{ type: 'reference', to: [{ type: 'lesson' }] }],
+            of: [{ type: 'reference', to: [{ type: 'subject' }] }],
         }),
         defineField({
             name: 'Performance',

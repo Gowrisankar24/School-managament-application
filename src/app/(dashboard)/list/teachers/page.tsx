@@ -5,7 +5,14 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ITEMS_PER_PAGE, role, teachersListData } from '@/lib/data';
 import { FormModal } from '@/components/FormModal';
-import { TEACHERS_LIST_QUERY } from '@/sanity/lib/queries';
+import {
+    CLASS_LIST_QUERY,
+    CLASS_LIST_QUERY_ALL_COUNT,
+    SUBJECTS_LIST_ALL_COUNT,
+    SUBJECTS_LIST_QUERY,
+    TEACHERS_LIST_ALL_COUNT,
+    TEACHERS_LIST_QUERY,
+} from '@/sanity/lib/queries';
 import { client } from '@/sanity/lib/client';
 import Table from '@/components/Table';
 import dynamic from 'next/dynamic';
@@ -67,19 +74,46 @@ const TeachersListPage = async ({
 }) => {
     const { classId: classIdQueryParams, page } = await searchParams;
     const p = page ? parseInt(page) : 1;
-    const query = TEACHERS_LIST_QUERY(p, ITEMS_PER_PAGE);
-    const TeachersListTableData = await client.fetch(query);
+    const [totalClsCount, totalSubsCount] = await Promise.all([
+        client.fetch(CLASS_LIST_QUERY_ALL_COUNT),
+        client.fetch(SUBJECTS_LIST_ALL_COUNT),
+    ]);
+    const [
+        TeachersListTableData,
+        TeacherTotalCount,
+        getClassesListTableData,
+        getSubjectsListTableData,
+    ] = await Promise.all([
+        client.fetch(TEACHERS_LIST_QUERY, {
+            start: (p - 1) * ITEMS_PER_PAGE,
+            limit: ITEMS_PER_PAGE,
+        }),
+        client.fetch(TEACHERS_LIST_ALL_COUNT),
+        client.fetch(CLASS_LIST_QUERY, {
+            start: (p - 1) * ITEMS_PER_PAGE,
+            limit: totalClsCount,
+        }),
+        client.fetch(SUBJECTS_LIST_QUERY, {
+            start: (p - 1) * ITEMS_PER_PAGE,
+            limit: totalSubsCount,
+        }),
+    ]);
 
     //filter table data
     const FilteredTableData = classIdQueryParams
-        ? TeachersListTableData?.map((d: Teacher) => {
-              return {
-                  ...d,
-                  classes: d.classes.filter(cls => cls.classId === classIdQueryParams),
-              };
-          })
+        ? TeachersListTableData?.map((record: { [key: string]: any }) => {
+              const filteredByCls = record?.classes?.filter(
+                  (c: { [key: string]: string | number }) => c?.classId === classIdQueryParams
+              );
+              if (filteredByCls?.length > 0) {
+                  return {
+                      ...record,
+                      classes: filteredByCls,
+                  };
+              }
+              return null;
+          }).filter((d: any) => d !== null)
         : TeachersListTableData;
-    //
 
     const renderRow = (item: Teacher) => {
         return (
@@ -108,7 +142,7 @@ const TeachersListPage = async ({
                 </td>
                 <td className="hidden md:table-cell">
                     {Object.values(item?.classes)
-                        ?.map((d: any) => d.name)
+                        ?.map((d: any) => d?.name)
                         .join(',')}
                 </td>
                 <td className="hidden lg:table-cell">{item?.phone}</td>
@@ -133,27 +167,14 @@ const TeachersListPage = async ({
             </tr>
         );
     };
-    const uniquesClasses = FilteredTableData?.flatMap((data: Teacher) => data?.classes)?.reduce(
-        (acc: { _id: string; name: string }[], { _id, name }: { _id: string; name: string }) => {
-            if (!acc?.some(item => item?._id == _id)) {
-                acc?.push({ _id, name });
-            }
-            return acc;
-        },
-        []
-    );
-    const getUniqueSubjects = FilteredTableData?.flatMap((data: Teacher) => data?.subjects)?.reduce(
-        (
-            acc: { _id: string; subjectName: string }[],
-            { _id, subjectName }: { _id: string; subjectName: string }
-        ) => {
-            if (!acc?.some(item => item?._id == _id)) {
-                acc?.push({ _id, subjectName });
-            }
-            return acc;
-        },
-        []
-    );
+    const uniquesClasses = getClassesListTableData?.map((cls: { [key: string]: any }) => ({
+        _id: cls?._id,
+        name: cls?.name,
+    }));
+    const getUniqueSubjects = getSubjectsListTableData?.map((sub: { [key: string]: any }) => ({
+        _id: sub?._id,
+        subjectName: sub?.subjectName,
+    }));
     return (
         <div className="bg-white p-4 flex-1 rounded-md m-4 mt-0">
             {/* Top */}
@@ -189,18 +210,12 @@ const TeachersListPage = async ({
                     {/* List */}
                     <Table columns={headerColumns} renderRow={renderRow} data={FilteredTableData} />
 
-                    {TeachersListTableData[0]?.totalCount > 10 && (
-                        <>
-                            {/* Pagination */}
+                    {/* Pagination */}
 
-                            <div className="">
-                                <Pagination
-                                    page={p}
-                                    totalCount={TeachersListTableData[0]?.totalCount}
-                                />
-                            </div>
-                        </>
-                    )}
+                    <div className="">
+                        <Pagination page={p} totalCount={TeacherTotalCount} />
+                    </div>
+
                     {/* </Suspense> */}
                 </>
             ) : (

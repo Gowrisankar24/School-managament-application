@@ -3,18 +3,56 @@ import React from 'react';
 import { MdBloodtype, MdOutlineMail, MdCoPresent } from 'react-icons/md';
 import { FaCalendarAlt, FaMobileAlt, FaCodeBranch, FaChalkboard, FaEdit } from 'react-icons/fa';
 import { SiGoogleclassroom } from 'react-icons/si';
-import { ScheduleBigCalendar } from '@/components/ScheduleBigCalendar';
 import { Announcements } from '@/components/Announcements';
 import Link from 'next/link';
 import { PerformanceChart } from '@/components/PerformanceChart';
 import { FormModal } from '@/components/FormModal';
 import { client } from '@/sanity/lib/client';
-import { STUDENTS_INFO_BY_ID } from '@/sanity/lib/queries';
+import {
+    CLASS_LIST_QUERY,
+    CLASS_LIST_QUERY_ALL_COUNT,
+    STUDENTS_INFO_BY_ID,
+    STUDENTS_SCHEDULE_TIMINGS,
+    SUBJECTS_LIST_ALL_COUNT,
+    SUBJECTS_LIST_QUERY,
+} from '@/sanity/lib/queries';
 import moment from 'moment';
+import { ScheduleBigCalendar } from '@/components/ScheduleBigCalendar';
+import { Tooltip } from '@mui/material';
+import { ITEMS_PER_PAGE } from '@/lib/data';
 
-const StudentProfilePage = async ({ params }: { params: Promise<{ id: string }> }) => {
-    const id = (await params).id;
-    const StudentProfileData = await client.fetch(STUDENTS_INFO_BY_ID, { id });
+const StudentProfilePage = async ({
+    params,
+}: {
+    params: Promise<{ [key: string]: string | undefined }>;
+}) => {
+    const { id, page } = await params;
+    const p = page ? parseInt(page) : 1;
+    const [totalClassListCount, totalSubListCount] = await Promise.all([
+        client.fetch(CLASS_LIST_QUERY_ALL_COUNT),
+        client.fetch(SUBJECTS_LIST_ALL_COUNT),
+    ]);
+    const [StudentProfileData, filteredClsData, filteredSubData] = await Promise.all([
+        client.fetch(STUDENTS_INFO_BY_ID, { id }),
+        client.fetch(CLASS_LIST_QUERY, {
+            start: (p - 1) * ITEMS_PER_PAGE,
+            limit: totalClassListCount,
+        }),
+        client.fetch(SUBJECTS_LIST_QUERY, {
+            start: (p - 1) * ITEMS_PER_PAGE,
+            limit: totalSubListCount,
+        }),
+    ]);
+
+    const studentScheduleTimingData = await client.fetch(STUDENTS_SCHEDULE_TIMINGS, {
+        id: StudentProfileData?.class?._id,
+    });
+
+    const ScheduleData = studentScheduleTimingData?.flatMap(
+        (d: { [key: string]: string }) => d?.ScheduleTime
+    );
+
+    console.log('StudentProfileData', ScheduleData);
     return (
         <div className="flex-1 p-4 flex flex-col gap-4 xl:flex-row">
             {/* Left */}
@@ -41,13 +79,21 @@ const StudentProfilePage = async ({ params }: { params: Promise<{ id: string }> 
                                     table="student"
                                     type="update"
                                     data={StudentProfileData}
+                                    dropdownClsData={filteredClsData}
+                                    dropdownSubsData={filteredSubData}
                                     icon={<FaEdit className="text-sm" />}
                                 />
                             </div>
                             <p className="text-sm text-gray-500">
-                                {StudentProfileData?.description?.length > 150
-                                    ? `${StudentProfileData?.description.slice(0, 150)}...`
-                                    : StudentProfileData?.description}
+                                {StudentProfileData?.description?.length > 150 ? (
+                                    <Tooltip title={StudentProfileData?.description}>
+                                        <span>
+                                            {StudentProfileData?.description.slice(0, 150)}...
+                                        </span>
+                                    </Tooltip>
+                                ) : (
+                                    <span>{StudentProfileData?.description}</span>
+                                )}
                             </p>
                             <div className="flex justify-between items-center gap-2 flex-wrap text-xs font-medium">
                                 <div className="w-full md:w-1/3 lg:w-full 2xl:w-1/3 flex items-center gap-2">
@@ -88,7 +134,13 @@ const StudentProfilePage = async ({ params }: { params: Promise<{ id: string }> 
                                 <h1 className="font-semibold text-xl">
                                     {StudentProfileData?.grade}
                                     <sup className="text-xs">
-                                        {StudentProfileData?.grade == '1' ? 'st' : 'nd'}
+                                        {StudentProfileData?.grade == '1'
+                                            ? 'st'
+                                            : StudentProfileData?.grade == '2'
+                                              ? 'nd'
+                                              : StudentProfileData?.grade == '3'
+                                                ? 'rd'
+                                                : 'th'}
                                     </sup>
                                 </h1>
                                 <span className="text-sm text-gray-500">Grade</span>
@@ -98,9 +150,9 @@ const StudentProfilePage = async ({ params }: { params: Promise<{ id: string }> 
                             <FaChalkboard className="w-6 h-6" />
                             <div className="">
                                 <h1 className="font-semibold text-xl">
-                                    {StudentProfileData?.studentLessonCount}
+                                    {StudentProfileData?.studentSubjectCount}
                                 </h1>
-                                <span className="text-sm text-gray-500">Lessons</span>
+                                <span className="text-sm text-gray-500">Subjects</span>
                             </div>
                         </div>
                         <div className="bg-white p-4 rounded-md flex gap-4 w-full md:w-[48%] xl:w-[45%] 2xl:w-[w-48%]">
@@ -117,7 +169,7 @@ const StudentProfilePage = async ({ params }: { params: Promise<{ id: string }> 
                 {/* Student`s schedule calendar */}
                 <div className="mt-4 bg-white rounded-md p-4 h-[800px]">
                     <h1 className="font-medium">Student Schedule</h1>
-                    {/* <ScheduleBigCalendar /> */}
+                    <ScheduleBigCalendar scheduleData={ScheduleData} />
                 </div>
             </div>
             {/* Right */}
@@ -127,9 +179,9 @@ const StudentProfilePage = async ({ params }: { params: Promise<{ id: string }> 
                     <div className="mt-4 flex gap-3 flex-wrap text-xs text-gray-500">
                         <Link
                             className="p-3 rounded-md bg-lightSky"
-                            href={`/list/lessons?classId=${StudentProfileData?.class?.classId}`}
+                            href={`/list/classes?classId=${StudentProfileData?.class?.classId}`}
                         >
-                            Student`s Lessons
+                            Student`s Class
                         </Link>
                         <Link
                             className="p-3 rounded-md bg-lightBlue"
@@ -159,7 +211,6 @@ const StudentProfilePage = async ({ params }: { params: Promise<{ id: string }> 
                 </div>
                 <PerformanceChart chartData={StudentProfileData?.Performance} />
                 <Announcements
-                    top3Data={StudentProfileData?.class?.studentInfoAnnouncementTop3}
                     announcementData={StudentProfileData?.class?.studentInfoAnnouncement}
                 />
             </div>

@@ -10,6 +10,8 @@ import { assignmentTableTypes } from './assignment';
 import { eventsTableListTypes } from './event';
 import { ResultsTableTypes } from './result';
 import { AnnoncementTableTypes } from './announcement';
+import { AttendanceChartTypes } from './attendance';
+import { FinanceChartTypes } from './finance';
 
 export const schema: { types: SchemaTypeDefinition[] } = {
     types: [
@@ -24,5 +26,7 @@ export const schema: { types: SchemaTypeDefinition[] } = {
         eventsTableListTypes,
         ResultsTableTypes,
         AnnoncementTableTypes,
+        AttendanceChartTypes,
+        FinanceChartTypes,
     ],
 };

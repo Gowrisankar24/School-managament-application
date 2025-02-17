@@ -16,6 +16,7 @@ export default {
                 lightYellow: '#edd51c',
                 lightBlue: '#99a2de',
                 paleYellow: '#ded895',
+                lightBrown: '#3b261e',
             },
         },
     },

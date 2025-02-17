@@ -1,15 +1,21 @@
 import React from 'react';
 import { FaFilter, FaPlus, FaEdit, FaSortAmountDown } from 'react-icons/fa';
 import { MdDeleteOutline } from 'react-icons/md';
-import { parentsListData, role } from '@/lib/data';
-import { TableSearchCompo } from '@/components/TableSearchCompo';
-import { Table } from '@/components/Table';
-import { Pagination } from '@/components/Pagination';
+import { ITEMS_PER_PAGE, parentsListData, role } from '@/lib/data';
+import TableSearchCompo from '@/components/TableSearchCompo';
+import Table from '@/components/Table';
+import Pagination from '@/components/Pagination';
 import { FormModal } from '@/components/FormModal';
-import { sanityFetch } from '@/sanity/lib/live';
-import { PARENTS_LIST_QUERY } from '@/sanity/lib/queries';
+import {
+    PARENT_LIST_BY_ALL_COUNT,
+    PARENTS_LIST_QUERY,
+    STUDENTS_LIST_ALL_COUNT,
+    STUDENTS_LIST_QUERY,
+} from '@/sanity/lib/queries';
+import { client } from '@/sanity/lib/client';
 
 type Parent = {
+    _id: string;
     parentId: string;
     name: string;
     email?: string;
@@ -45,8 +51,29 @@ const headerColumns = [
     },
 ];
 
-const ParentListPage = async () => {
-    const { data: ParentsTableListData } = await sanityFetch({ query: PARENTS_LIST_QUERY });
+const ParentListPage = async ({
+    searchParams,
+}: {
+    searchParams: Promise<{ [key: string]: string | undefined }>;
+}) => {
+    const { page } = await searchParams;
+    const p = page ? parseInt(page) : 1;
+    const totalCount = await client.fetch(STUDENTS_LIST_ALL_COUNT);
+    const [ParentsTableListData, ParentTotalCount, GetStudentTableData] = await Promise.all([
+        client.fetch(PARENTS_LIST_QUERY, {
+            start: (p - 1) * ITEMS_PER_PAGE,
+            limit: ITEMS_PER_PAGE,
+        }),
+        client.fetch(PARENT_LIST_BY_ALL_COUNT),
+        client.fetch(STUDENTS_LIST_QUERY, {
+            start: 0,
+            limit: totalCount,
+        }),
+    ]);
+    const getFilterStudentName = GetStudentTableData?.map((d: { [key: string]: string }) => ({
+        _id: d?._id,
+        name: d?.name,
+    }));
     const renderRow = (item: Parent) => {
         return (
             <tr
@@ -75,11 +102,12 @@ const ParentListPage = async () => {
                                     type="update"
                                     data={item}
                                     icon={<FaEdit className="text-sm" />}
+                                    dropdownStudentData={getFilterStudentName}
                                 />
                                 <FormModal
                                     table="parent"
                                     type="delete"
-                                    id={item?.parentId}
+                                    id={item?._id}
                                     icon={<MdDeleteOutline className="text-lg" />}
                                 />
                             </>
@@ -109,6 +137,7 @@ const ParentListPage = async () => {
                                 table="parent"
                                 type="create"
                                 icon={<FaPlus className="text-[15px]" />}
+                                dropdownStudentData={getFilterStudentName}
                             />
                         )}
                     </div>
@@ -126,7 +155,7 @@ const ParentListPage = async () => {
 
                     {/* Pagination */}
                     <div className="">
-                        <Pagination />
+                        <Pagination page={p} totalCount={ParentTotalCount} />
                     </div>
                 </>
             ) : (

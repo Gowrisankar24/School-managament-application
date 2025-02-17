@@ -11,47 +11,22 @@ import {
     Legend,
     CartesianGrid,
 } from 'recharts';
-export const AttendanceChart = () => {
-    const data = [
-        {
-            name: 'Mon',
-            present: 60,
-            absent: 24,
-        },
-        {
-            name: 'Tue',
-            present: 45,
-            absent: 56,
-        },
-        {
-            name: 'Wed',
-            present: 20,
-            absent: 60,
-        },
-        {
-            name: 'Thu',
-            present: 78,
-            absent: 38,
-        },
-        {
-            name: 'Fri',
-            present: 18,
-            absent: 40,
-        },
-    ];
-
+export const AttendanceChart = ({
+    attendanceData,
+}: {
+    attendanceData: Array<{ [key: string]: string | number }>;
+}) => {
     return (
         <div className="bg-white rounded-xl p-4 w-full h-full">
             {/* title */}
             <div className="flex justify-between items-center">
                 <h1 className="font-semibold text-lg">Attendance</h1>
-                <BsThreeDots className="text-lg" />
             </div>
 
             {/* Charts Content */}
 
             <ResponsiveContainer width={'100%'} height="90%">
-                <BarChart width={500} height={300} data={data} barSize={20}>
+                <BarChart width={500} height={300} data={attendanceData} barSize={20}>
                     <XAxis
                         dataKey="name"
                         tick={{ fill: '#d1d3d5' }}
@@ -67,14 +42,14 @@ export const AttendanceChart = () => {
                         wrapperStyle={{ paddingTop: '20px', paddingBottom: '40px' }}
                     />
                     <Bar
-                        dataKey="present"
+                        dataKey="Present"
                         fill="#84baf5"
                         // activeBar={<Rectangle fill='pink' stroke='blue' />}
                         legendType="circle"
                         radius={[10, 10, 0, 0]}
                     />
                     <Bar
-                        dataKey="absent"
+                        dataKey="Absent"
                         fill="#edd51c"
                         // activeBar={<Rectangle fill='gold' stroke='purple' />}
                         legendType="circle"

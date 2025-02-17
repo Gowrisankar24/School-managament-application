@@ -51,10 +51,10 @@ export const ScheduleBigCalendar = ({ scheduleData }: { scheduleData: ScheduleDa
                         .toDate()}
                 />
             ) : (
-                <div className="flex flex-1 justify-center">
-                    <span className="text-gray-800 items-center">
+                <div className="flex justify-center items-center">
+                    <h2 className="text-gray-800 items-center text-xl">
                         No Schedule has been allotted
-                    </span>
+                    </h2>
                 </div>
             )}
         </>
