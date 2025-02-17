@@ -4,7 +4,7 @@ import React, { Dispatch, SetStateAction, useCallback, useEffect, useState } fro
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ReusableInputFields } from '../ReusableInputFields';
-import { MdCancel, MdCloudUpload } from 'react-icons/md';
+import { MdCancel, MdCloudUpload, MdDelete } from 'react-icons/md';
 import { teacherSchema, TeacherSchemaTypes } from '@/lib/formValidationSchema';
 import { CldUploadWidget } from 'next-cloudinary';
 import { createAction } from '@/lib/action';
@@ -12,9 +12,10 @@ import moment from 'moment';
 import { useRouter } from 'next/navigation';
 import { v4 as uuidv4 } from 'uuid';
 import { Typography, Box, Chip, MenuItem, Select, SelectChangeEvent } from '@mui/material';
-import { z } from 'zod';
 import { toast } from 'react-toastify';
 import { isEmpty } from 'lodash';
+import { reusableFunc } from '@/lib/utils';
+import { TEACHER_DOC_TYPE } from '@/lib/data';
 
 const TeacherForm = ({
     type,
@@ -38,21 +39,18 @@ const TeacherForm = ({
         resolver: zodResolver(teacherSchema),
     });
     const [imgFile, setImgFile] = useState<any>();
+    const [imgURL, setImgURL] = useState<any>();
     const [selectedSubjectVal, setSelectedSubjectVal] = useState<string[]>([]);
     const [selectedClsVal, setSelectedClsVal] = useState<string[]>([]);
 
-    //set default values of select compo
+    // //set default values of select compo
     useEffect(() => {
         if (!isEmpty(data)) {
-            const reusableFunc = (value: Array<{ _id: string[] }>) => {
-                const getId = value?.map(d => d?._id);
-                return getId;
-            };
             const getDefaultSub: any = reusableFunc(data?.subjects);
             const getDefaultCls: any = reusableFunc(data?.classes);
             setSelectedSubjectVal(getDefaultSub);
             setSelectedClsVal(getDefaultCls);
-            setImgFile(data?.photo);
+            setImgURL(data?.photo);
         }
     }, [data]);
 
@@ -62,7 +60,7 @@ const TeacherForm = ({
             const {
                 target: { value },
             } = event;
-            setSelectedSubjectVal(typeof value === 'string' ? value.split(',') : value);
+            setSelectedSubjectVal(Array.isArray(value) ? value : value.split(','));
         },
         [selectedSubjectVal]
     );
@@ -77,7 +75,6 @@ const TeacherForm = ({
         },
         [selectedClsVal]
     );
-
     const onSubmitForm = handleSubmit(async formData => {
         try {
             const FormPropsTeacher = {
@@ -88,7 +85,7 @@ const TeacherForm = ({
                         : data?.teacherId,
                 name: formData?.name + ' ' + formData?.surname,
                 email: formData?.email,
-                photo: type === 'create' ? imgFile?.secure_url : data?.photo,
+                photo: imgURL,
                 phone: formData?.phone,
                 address: formData?.address,
                 bloodType: formData?.bloodType,
@@ -100,43 +97,38 @@ const TeacherForm = ({
                     value: formData?.performance / 2,
                     _key: uuidv4(),
                 })),
-                subjects: formData?.subjects?.map(sub => ({
+                subjects: selectedSubjectVal?.map(sub => ({
                     _type: 'reference',
                     _ref: sub,
                     _key: uuidv4(),
                 })),
-                classes: formData?.classes?.map(cls => ({
+                classes: selectedClsVal?.map(cls => ({
                     _type: 'reference',
                     _ref: cls,
                     _key: uuidv4(),
                 })),
-                lessons: formData?.subjects?.map(sub => ({
-                    _type: 'reference',
-                    _ref: sub,
-                    _key: uuidv4(),
-                })),
-                branches: formData?.subjects?.length,
+                attendance: formData?.attendance,
+                // lessons: selectedSubjectVal.map(sub => ({
+                //     _type: 'reference',
+                //     _ref: sub,
+                //     _key: uuidv4(),
+                // })),
+                branches: selectedSubjectVal?.length,
                 username: formData?.username,
                 password: formData?.password,
                 description: formData?.description,
             };
-            const result = await createAction(FormPropsTeacher, 'teacher');
+            const result = await createAction(FormPropsTeacher, TEACHER_DOC_TYPE);
             if (result?.status === 'SUCCESS') {
                 router.push(`/list/teachers`);
                 setOpen(false);
-                toast.success(`Teachers info added successfully`, {
+                toast.success(`Teachers info ${type}d successfully`, {
                     position: 'top-right',
                     autoClose: 5000,
                 });
             }
         } catch (err) {
             console.log('err', err);
-            if (err instanceof z.ZodError) {
-                const fieldsError = err.flatten().fieldErrors;
-                // setErrors(fieldsError as unknown as Record<string, string>);
-            } else {
-                console.error('Unknown error:', err);
-            }
             toast.error(`Failed to add Teachers list`, {
                 position: 'top-right',
                 autoClose: 5000,
@@ -156,7 +148,12 @@ const TeacherForm = ({
                         variant="caption"
                         className="font-semibold bg-lightSky p-2 relative rounded-t-md flex flex-row items-center"
                     >
-                        <h3 className="text-lg mx-1">Create a new Teacher</h3>
+                        <h3 className="text-lg mx-1">
+                            {' '}
+                            {type === 'create'
+                                ? 'Create a new Teacher Details'
+                                : 'Update the Teacher Details'}
+                        </h3>
                         <span
                             className="absolute right-2 cursor-pointer"
                             onClick={() => setOpen(false)}
@@ -249,14 +246,6 @@ const TeacherForm = ({
                                     error={errors.birthday}
                                     type="date"
                                 />
-                                <ReusableInputFields
-                                    label="Performance (max 200)"
-                                    name="performance"
-                                    register={register}
-                                    defaultValue={performanceTotalVal}
-                                    error={errors?.performance}
-                                />
-
                                 <div className="flex flex-col gap-2 w-full md:w-1/4">
                                     <label className="text-xs text-gray-500">Sex</label>
                                     <select
@@ -273,59 +262,29 @@ const TeacherForm = ({
                                         </p>
                                     )}
                                 </div>
-                                <div className="flex flex-col gap-2 w-full md:w-1/4">
-                                    <label className="text-xs text-gray-500">Upload Photo</label>
-                                    <CldUploadWidget
-                                        uploadPreset="school_app"
-                                        onSuccess={(result, { widget }) => {
-                                            setImgFile(result.info);
-                                            widget.close();
-                                        }}
-                                    >
-                                        {({ open }) => {
-                                            return (
-                                                <>
-                                                    <div
-                                                        className="text-xs text-gray-500 flex flex-col items-center cursor-pointer gap-2"
-                                                        onClick={() => open()}
-                                                    >
-                                                        <div className="flex items-center gap-2">
-                                                            <MdCloudUpload className="text-3xl" />
-                                                            <span>Upload a Photo</span>
-                                                        </div>
-                                                        {imgFile && (
-                                                            <div className="flex flex-row text-green-400 items-center">
-                                                                <span>{imgFile?.display_name}</span>
-                                                                {/* <MdDelete
-                                                    className="cursor-pointer text-red-500"
-                                                    onClick={() => setImgFile(null)}
-                                                /> */}
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </>
-                                            );
-                                        }}
-                                    </CldUploadWidget>
-                                    {imgFile && (
-                                        <span className="text-xs whitespace-nowrap text-ellipsis overflow-hidden gap-0">
-                                            <a
-                                                href={imgFile}
-                                                target="_blank"
-                                                className="text-violet-400"
-                                            >
-                                                {imgFile}
-                                            </a>
-                                        </span>
-                                    )}
-                                </div>
+                                <ReusableInputFields
+                                    label="Attendance %"
+                                    name="attendance"
+                                    defaultValue={data?.attendance}
+                                    register={register}
+                                    error={errors?.attendance}
+                                />
+                                <ReusableInputFields
+                                    label="Performance (max 200)"
+                                    name="performance"
+                                    register={register}
+                                    defaultValue={performanceTotalVal}
+                                    error={errors?.performance}
+                                />
+
                                 <div className="flex flex-row gap-3 w-full">
                                     <div className="flex flex-col gap-2 w-full">
                                         <label className="text-xs text-gray-500">Subjects</label>
                                         <Select
+                                            key={'subjects'}
                                             multiple
                                             className="p-2 rounded-md text-sm w-full"
-                                            {...register('subjects')}
+                                            // {...register('subjects')}
                                             value={selectedSubjectVal}
                                             onChange={handleSubjectChange}
                                             renderValue={selected => {
@@ -354,24 +313,26 @@ const TeacherForm = ({
                                                 );
                                             }}
                                         >
-                                            {dropdownSubsData?.map(sub => (
+                                            {dropdownSubsData?.map((sub: any) => (
                                                 <MenuItem key={sub?._id} value={sub?._id}>
                                                     {sub?.subjectName}
                                                 </MenuItem>
                                             ))}
                                         </Select>
+                                        {/* 
                                         {errors?.subjects?.message && (
-                                            <p className="text-xs text-red-400">
-                                                {errors?.subjects?.message.toString()}
-                                            </p>
+                                            // <p className="text-xs text-red-400">
+                                            //     {errors?.subjects?.message.toString()}
+                                            // </p>
                                         )}
+                                        */}
                                     </div>
                                     <div className="flex flex-col gap-2 w-full">
                                         <label className="text-xs text-gray-500">Classes</label>
                                         <Select
                                             multiple
                                             className="p-2 rounded-md text-sm w-full"
-                                            {...register('classes')}
+                                            // {...register('classes')}
                                             value={selectedClsVal}
                                             onChange={handleClsChange}
                                             defaultValue={data?.classes?.name}
@@ -407,30 +368,77 @@ const TeacherForm = ({
                                                 </MenuItem>
                                             ))}
                                         </Select>
-                                        {errors?.classes?.message && (
+                                        {/* {errors?.classes?.message && (
                                             <p className="text-xs text-red-400">
                                                 {errors?.classes?.message.toString()}
                                             </p>
-                                        )}
+                                        )} */}
                                     </div>
                                 </div>
-
-                                <div className="flex flex-col gap-2 w-full md:w-1/2">
-                                    <label className="text-xs text-gray-500">Description</label>
-                                    <textarea
-                                        {...register('description')}
-                                        rows={3}
-                                        minLength={5}
-                                        cols={10}
-                                        className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
-                                        defaultValue={data?.description}
-                                    />
+                                <div className="flex flex-row gap-3 w-full">
+                                    <div className="flex flex-col gap-2 w-full md:w-1/2">
+                                        <label className="text-xs text-gray-500">Description</label>
+                                        <textarea
+                                            {...register('description')}
+                                            rows={3}
+                                            minLength={5}
+                                            cols={10}
+                                            className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
+                                            defaultValue={data?.description}
+                                        />
+                                    </div>
+                                    <div className="flex flex-col gap-3 p-2 w-full md:w-1/2">
+                                        <label className="text-xs text-gray-500">
+                                            Upload Photo
+                                        </label>
+                                        <CldUploadWidget
+                                            uploadPreset="school_app"
+                                            onSuccess={(result: any, { widget }) => {
+                                                setImgFile(result.info);
+                                                setImgURL(result?.info?.secure_url);
+                                                widget.close();
+                                            }}
+                                        >
+                                            {({ open }) => {
+                                                return (
+                                                    <>
+                                                        <div
+                                                            className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-xs text-gray-500 flex flex-col items-center cursor-pointer"
+                                                            onClick={() => open()}
+                                                        >
+                                                            <span className="flex items-center gap-2">
+                                                                <MdCloudUpload className="text-xl" />
+                                                                <span>Upload a Photo</span>
+                                                            </span>
+                                                        </div>
+                                                    </>
+                                                );
+                                            }}
+                                        </CldUploadWidget>
+                                        {imgURL && (
+                                            <div className="flex flex-row gap-2">
+                                                <a
+                                                    href={imgURL}
+                                                    target="_blank"
+                                                    className="text-violet-400 text-xs whitespace-nowrap text-ellipsis overflow-hidden"
+                                                >
+                                                    {imgFile?.display_name || imgURL}
+                                                </a>
+                                                <span className="text-lg">
+                                                    <MdDelete
+                                                        className="cursor-pointer text-red-500"
+                                                        onClick={() => setImgURL(null)}
+                                                    />
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </Box>
                         </Box>
                         <Box className="flex justify-center items-center gap-5 my-4">
                             <button className="bg-blue-400 text-white p-2 rounded-md">
-                                Submit
+                                {type === 'create' ? 'Create' : 'Update'}
                             </button>
                         </Box>
                     </form>

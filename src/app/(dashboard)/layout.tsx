@@ -1,7 +1,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { Menu } from '@/components/Menu';
 import { Navbar } from '@/components/Navbar';
+import { ToastContainer } from 'react-toastify';
+import Menu from '@/components/Menu';
 
 export default function DashboardLayout({ children }: Readonly<{ children: React.ReactNode }>) {
     return (
@@ -23,6 +24,7 @@ export default function DashboardLayout({ children }: Readonly<{ children: React
             {/* main content */}
             <div className="w-[86%] md:w-[92%] lg:w-[84%] xl:w-[86%] bg-[#f0f2f0] overflow-scroll flex flex-col">
                 <Navbar />
+                <ToastContainer />
                 {children}
             </div>
         </div>

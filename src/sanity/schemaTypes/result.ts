@@ -43,12 +43,7 @@ export const ResultsTableTypes = defineType({
             type: 'date',
             validation: Rule => Rule.required(),
         }),
-        defineField({
-            name: 'type',
-            type: 'string',
-            initialValue: 'exam',
-            validation: Rule => Rule.required(),
-        }),
+
         defineField({
             name: 'score',
             type: 'number',

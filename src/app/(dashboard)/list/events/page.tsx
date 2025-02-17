@@ -1,16 +1,23 @@
 import React from 'react';
 import { FaFilter, FaPlus, FaEdit, FaSortAmountDown } from 'react-icons/fa';
 import { MdDeleteOutline } from 'react-icons/md';
-import { eventsListData, role } from '@/lib/data';
-import { TableSearchCompo } from '@/components/TableSearchCompo';
-import { Table } from '@/components/Table';
-import { Pagination } from '@/components/Pagination';
+import { eventsListData, ITEMS_PER_PAGE, role } from '@/lib/data';
+import TableSearchCompo from '@/components/TableSearchCompo';
+import Table from '@/components/Table';
+import Pagination from '@/components/Pagination';
 import { FormModal } from '@/components/FormModal';
 import { sanityFetch } from '@/sanity/lib/live';
-import { EVENTS_LIST_QUERY } from '@/sanity/lib/queries';
+import {
+    CLASS_LIST_QUERY,
+    CLASS_LIST_QUERY_ALL_COUNT,
+    EVENTS_LIST_QUERY,
+    EVENTS_LIST_QUERY_ALL_COUNT,
+} from '@/sanity/lib/queries';
 import moment from 'moment';
+import { client } from '@/sanity/lib/client';
 
 type Events = {
+    _id: string;
     eventId: number | string;
     title: string;
     class: { [key: string]: string | number };
@@ -50,8 +57,29 @@ const headerColumns = [
     },
 ];
 
-const EventsListPage = async () => {
-    const { data: EventListTableData } = await sanityFetch({ query: EVENTS_LIST_QUERY });
+const EventsListPage = async ({
+    searchParams,
+}: {
+    searchParams: Promise<{ [key: string]: string | undefined }>;
+}) => {
+    const { page } = await searchParams;
+    const p = page ? parseInt(page) : 1;
+    const totalListClsCount = await client.fetch(CLASS_LIST_QUERY_ALL_COUNT);
+    const [EventListTableData, TotalEventListCount, getClassList] = await Promise.all([
+        client.fetch(EVENTS_LIST_QUERY, {
+            start: (p - 1) * ITEMS_PER_PAGE,
+            limit: ITEMS_PER_PAGE,
+        }),
+        client.fetch(EVENTS_LIST_QUERY_ALL_COUNT),
+        client.fetch(CLASS_LIST_QUERY, {
+            start: (p - 1) * ITEMS_PER_PAGE,
+            limit: totalListClsCount,
+        }),
+    ]);
+    const uniqueClasses = getClassList?.map((d: { [key: string]: string | number }) => ({
+        _id: d?._id,
+        name: d?.name,
+    }));
     const renderRow = (item: Events) => {
         let d = new Date();
         return (
@@ -77,11 +105,12 @@ const EventsListPage = async () => {
                                     type="update"
                                     data={item}
                                     icon={<FaEdit className="text-sm" />}
+                                    dropdownClsData={uniqueClasses}
                                 />
                                 <FormModal
                                     table="event"
                                     type="delete"
-                                    id={item?.eventId}
+                                    id={item?._id}
                                     icon={<MdDeleteOutline className="text-lg" />}
                                 />
                             </>
@@ -111,6 +140,7 @@ const EventsListPage = async () => {
                                 table="event"
                                 type="create"
                                 icon={<FaPlus className="text-[15px]" />}
+                                dropdownClsData={uniqueClasses}
                             />
                         )}
                     </div>
@@ -128,7 +158,7 @@ const EventsListPage = async () => {
 
                     {/* Pagination */}
                     <div className="">
-                        <Pagination />
+                        <Pagination page={p} totalCount={TotalEventListCount} />
                     </div>
                 </>
             ) : (

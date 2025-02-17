@@ -16,4 +16,6 @@ export const structure: StructureResolver = S =>
             S.documentTypeListItem('event').title('Event'),
             S.documentTypeListItem('result').title('Result'),
             S.documentTypeListItem('announcement').title('Announcement'),
+            S.documentTypeListItem('attendance').title('Attendance'),
+            S.documentTypeListItem('finance').title('Finance'),
         ]);

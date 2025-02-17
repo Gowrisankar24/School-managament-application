@@ -1,33 +1,31 @@
-import React from 'react';
-import { FaHome, FaUserCheck, FaCalendarAlt, FaUserCog } from 'react-icons/fa';
+'use client';
+import React, { useEffect, useState } from 'react';
+import { FaHome, FaCalendarAlt, FaUserCog } from 'react-icons/fa';
 import { GiTeacher } from 'react-icons/gi';
-import { PiStudentBold, PiChalkboardTeacherFill } from 'react-icons/pi';
+import { PiStudentBold } from 'react-icons/pi';
 import { RiParentLine } from 'react-icons/ri';
 import { SiGoogleclassroom } from 'react-icons/si';
 import { TfiWrite } from 'react-icons/tfi';
-import {
-    MdOutlineAssignment,
-    MdOutlineMessage,
-    MdOutlineSettings,
-    MdSubject,
-} from 'react-icons/md';
+import { MdOutlineAssignment, MdOutlineSettings, MdSubject } from 'react-icons/md';
 import { LuNotebookPen } from 'react-icons/lu';
 import { GrAnnounce } from 'react-icons/gr';
 import { AiOutlineLogout } from 'react-icons/ai';
 import Link from 'next/link';
 import { role } from '@/lib/data';
 
-export const Menu = () => {
+const Menu = () => {
+    const [selectedItem, setSelectedItem] = useState<string>(window?.location?.pathname);
+
     const MenuItems = [
         {
             title: 'MENU',
             items: [
-                {
-                    icon: <FaHome />,
-                    label: 'Home',
-                    href: '/',
-                    visible: ['student', 'parent', 'admin', 'teacher'],
-                },
+                // {
+                //     icon: <FaHome />,
+                //     label: 'Home',
+                //     href: '/',
+                //     visible: ['student', 'parent', 'admin', 'teacher'],
+                // },
                 {
                     icon: <GiTeacher />,
                     label: 'Teachers',
@@ -58,12 +56,12 @@ export const Menu = () => {
                     href: '/list/classes',
                     visible: ['parent', 'admin', 'teacher'],
                 },
-                {
-                    icon: <PiChalkboardTeacherFill />,
-                    label: 'Lessons',
-                    href: '/list/lessons',
-                    visible: ['parent', 'admin', 'teacher'],
-                },
+                // {
+                //     icon: <PiChalkboardTeacherFill />,
+                //     label: 'Lessons',
+                //     href: '/list/lessons',
+                //     visible: ['parent', 'admin', 'teacher'],
+                // },
                 {
                     icon: <TfiWrite />,
                     label: 'Exams',
@@ -82,24 +80,24 @@ export const Menu = () => {
                     href: '/list/results',
                     visible: ['admin', 'teacher', 'student', 'parent'],
                 },
-                {
-                    icon: <FaUserCheck />,
-                    label: 'Attendance',
-                    href: '/list/attendance',
-                    visible: ['student', 'parent', 'admin', 'teacher'],
-                },
+                // {
+                //     icon: <FaUserCheck />,
+                //     label: 'Attendance',
+                //     href: '/list/attendance',
+                //     visible: ['student', 'parent', 'admin', 'teacher'],
+                // },
                 {
                     icon: <FaCalendarAlt />,
                     label: 'Events',
                     href: '/list/events',
                     visible: ['student', 'parent', 'admin', 'teacher'],
                 },
-                {
-                    icon: <MdOutlineMessage />,
-                    label: 'Messaages',
-                    href: '/list/messages',
-                    visible: ['student', 'parent', 'admin', 'teacher'],
-                },
+                // {
+                //     icon: <MdOutlineMessage />,
+                //     label: 'Messaages',
+                //     href: '/list/messages',
+                //     visible: ['student', 'parent', 'admin', 'teacher'],
+                // },
                 {
                     icon: <GrAnnounce />,
                     label: 'Announcements',
@@ -145,7 +143,8 @@ export const Menu = () => {
                                 <Link
                                     href={d?.href}
                                     key={d?.label}
-                                    className="flex justify-center lg:justify-start gap-4 text-gray-500 py-2 px-2 font-semibold rounded-md hover:bg-lightSky"
+                                    className={`flex justify-center lg:justify-start gap-4 text-gray-500 py-2 px-2 font-semibold rounded-md hover:bg-lightSky ${selectedItem === d?.href ? 'bg-lightBrown text-white' : ''} `}
+                                    onClick={() => setSelectedItem(d?.href)}
                                 >
                                     <span className="text-2xl">{d?.icon}</span>
                                     <span className="hidden lg:block">{d?.label}</span>
@@ -160,3 +159,5 @@ export const Menu = () => {
         </div>
     );
 };
+
+export default Menu;

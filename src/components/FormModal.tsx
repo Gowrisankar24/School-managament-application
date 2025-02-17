@@ -1,24 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
-import React, { Dispatch, SetStateAction, useState } from 'react';
-// import dynamic from 'next/dynamic';
-// import { TeacherForm } from './forms/TeacherForm';
-import { StudentForm } from './forms/StudentForm';
-import { ParentForm } from './forms/ParentForm';
-import { ClassForm } from './forms/ClassForm';
-import { SubjectForm } from './forms/SubjectForm';
-import { EventForm } from './forms/EventForm';
-import { LessonForm } from './forms/LessonForm';
-import { ExamForm } from './forms/ExamForm';
-import { AssignmentForm } from './forms/AssignmentForm';
-import { ResultForm } from './forms/ResultForm';
+import React, { useState } from 'react';
+
+// import { LessonForm } from './forms/LessonForm';
 import { AnnouncementForm } from './forms/Announcement';
-import { Dialog, Modal, Popover, Typography } from '@mui/material';
-import { toast, ToastContainer } from 'react-toastify';
+import { Dialog, Modal, Typography } from '@mui/material';
+import { toast } from 'react-toastify';
 import dynamic from 'next/dynamic';
 import { deleteAction } from '@/lib/action';
-import { client } from '@/sanity/lib/client';
-import { TEACHERS_LIST_QUERY } from '@/sanity/lib/queries';
 import { useRouter } from 'next/navigation';
 
 export const FormModal = ({
@@ -29,6 +18,8 @@ export const FormModal = ({
     icon,
     dropdownClsData,
     dropdownSubsData,
+    dropdownStudentData,
+    dropDownTeacherList,
 }: {
     table:
         | 'teacher'
@@ -38,7 +29,7 @@ export const FormModal = ({
         | 'event'
         | 'exam'
         | 'event'
-        | 'lesson'
+        // | 'lesson'
         | 'parent'
         | 'result'
         | 'student'
@@ -50,6 +41,8 @@ export const FormModal = ({
     icon: React.ReactNode;
     dropdownClsData?: Array<{ _id: string; name: string }>;
     dropdownSubsData?: Array<{ _id: string; subjectName: string }>;
+    dropdownStudentData?: Array<{ [key: string]: string }>;
+    dropDownTeacherList?: Array<{ [key: string]: string }>;
 }) => {
     const router = useRouter();
     const [open, setOpen] = useState<boolean>(false);
@@ -62,11 +55,42 @@ export const FormModal = ({
         loading: () => <h1>Loading...</h1>,
     });
 
+    const StudentForm = dynamic(() => import('./forms/StudentForm'), {
+        loading: () => <h1>Loading...</h1>,
+    });
+
+    const ParentForm = dynamic(() => import('./forms/ParentForm'), {
+        loading: () => <h1>Loading...</h1>,
+    });
+
+    const SubjectForm = dynamic(() => import(`./forms/SubjectForm`), {
+        loading: () => <h1>Loading...</h1>,
+    });
+
+    const ClassForm = dynamic(() => import(`./forms/ClassForm`), {
+        loading: () => <h1>Loading...</h1>,
+    });
+
+    const ExamForm = dynamic(() => import(`./forms/ExamForm`), {
+        loading: () => <h1>Loading...</h1>,
+    });
+    const AssignmentForm = dynamic(() => import(`./forms/AssignmentForm`), {
+        loading: () => <h1>Loading...</h1>,
+    });
+
+    const ResultForm = dynamic(() => import(`./forms/ResultForm`), {
+        loading: () => <h1>Loading...</h1>,
+    });
+
+    const EventForm = dynamic(() => import(`./forms/EventForm`), {
+        loading: () => <h1>Loading...</h1>,
+    });
+
     const forms: {
         [key: string]: (
             type: 'create' | 'update',
-            data?: any,
-            setOpen?: Dispatch<SetStateAction<boolean>>
+            data?: any
+            // setOpen?: Dispatch<SetStateAction<Boolean>>
         ) => JSX.Element;
     } = {
         teacher: (type, data) => (
@@ -78,16 +102,88 @@ export const FormModal = ({
                 dropdownSubsData={dropdownSubsData}
             />
         ),
-        student: (type, data) => <StudentForm type={type} data={data} />,
-        parent: (type, data) => <ParentForm type={type} data={data} />,
-        class: (type, data) => <ClassForm type={type} data={data} />,
-        subject: (type, data) => <SubjectForm type={type} data={data} />,
-        lesson: (type, data) => <LessonForm type={type} data={data} />,
-        exam: (type, data) => <ExamForm type={type} data={data} />,
-        assignment: (type, data) => <AssignmentForm type={type} data={data} />,
-        result: (type, data) => <ResultForm type={type} data={data} />,
-        event: (type, data) => <EventForm type={type} data={data} />,
-        announcement: (type, data) => <AnnouncementForm type={type} data={data} />,
+        student: (type, data) => (
+            <StudentForm
+                type={type}
+                data={data}
+                setOpen={setOpen}
+                dropdownClsData={dropdownClsData}
+                dropdownSubsData={dropdownSubsData}
+            />
+        ),
+        parent: (type, data) => (
+            <ParentForm
+                type={type}
+                data={data}
+                setOpen={setOpen}
+                dropdownStudentData={dropdownStudentData}
+            />
+        ),
+        class: (type, data) => (
+            <ClassForm
+                type={type}
+                data={data}
+                setOpen={setOpen}
+                dropDownTeacherList={dropDownTeacherList}
+            />
+        ),
+        subject: (type, data) => (
+            <SubjectForm
+                type={type}
+                data={data}
+                setOpen={setOpen}
+                dropDownTeacherList={dropDownTeacherList}
+            />
+        ),
+        // lesson: (type, data) => <LessonForm type={type} data={data} />,
+        exam: (type, data) => (
+            <ExamForm
+                type={type}
+                data={data}
+                setOpen={setOpen}
+                dropDownTeacherList={dropDownTeacherList}
+                dropdownClsData={dropdownClsData}
+                dropdownSubsData={dropdownSubsData}
+            />
+        ),
+        assignment: (type, data) => (
+            <AssignmentForm
+                type={type}
+                data={data}
+                setOpen={setOpen}
+                dropDownTeacherList={dropDownTeacherList}
+                dropdownClsData={dropdownClsData}
+                dropdownSubsData={dropdownSubsData}
+            />
+        ),
+        result: (type, data) => (
+            <ResultForm
+                type={type}
+                data={data}
+                setOpen={setOpen}
+                dropdownStudentData={dropdownStudentData}
+                dropDownTeacherList={dropDownTeacherList}
+                dropdownClsData={dropdownClsData}
+                dropdownSubsData={dropdownSubsData}
+            />
+        ),
+        event: (type, data) => (
+            <EventForm
+                type={type}
+                data={data}
+                setOpen={setOpen}
+                dropdownClsData={dropdownClsData}
+            />
+        ),
+        announcement: (type, data) => (
+            <AnnouncementForm
+                type={type}
+                data={data}
+                setOpen={setOpen}
+                dropdownClsData={dropdownClsData}
+                dropDownTeacherList={dropDownTeacherList}
+            />
+        ),
     };
 
     //delete form func
@@ -96,16 +192,17 @@ export const FormModal = ({
             if (!id) {
                 throw new Error('ID is required');
             }
-            const deletedResult = await deleteAction(id, 'teacher');
-            console.log('deletedResult', deletedResult);
+            const deletedResult = await deleteAction(id, table);
             if (deletedResult?.status === 'SUCCESS') {
                 setOpen(false);
-                toast.success(`Teachers info deleted successfully`, {
-                    position: 'top-right',
-                    autoClose: 5000,
-                });
-                // await client.fetch(TEACHERS_LIST_QUERY);
-                router.push(`/list/teachers`);
+                toast.success(
+                    `${deletedResult?.results[0]?.document._type} info deleted successfully`,
+                    {
+                        position: 'top-right',
+                        autoClose: 5000,
+                    }
+                );
+                router.push(window.location.pathname);
             } else {
                 throw new Error('Unexpected delete response');
             }
@@ -127,7 +224,7 @@ export const FormModal = ({
                 <Dialog open={open}>
                     <Typography className="p-2">
                         Are you sure you want to delete this record from this{' '}
-                        <span className=" capitalize font-semibold">{table}</span>`s table?.
+                        <span className="capitalize font-semibold">{table}</span>`s table?.
                     </Typography>
                     <div className="flex flex-row justify-center items-center p-3 gap-3">
                         <button
@@ -187,7 +284,6 @@ export const FormModal = ({
                 //{' '}
             </div>
             )} */}
-            <ToastContainer />
         </>
     );
 };

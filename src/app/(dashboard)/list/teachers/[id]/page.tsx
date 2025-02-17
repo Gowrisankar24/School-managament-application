@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import React from 'react';
-import { MdBloodtype, MdOutlineMail, MdCoPresent } from 'react-icons/md';
+import { MdBloodtype, MdCoPresent } from 'react-icons/md';
 import { AiOutlineMail } from 'react-icons/ai';
 import { FaCalendarAlt, FaMobileAlt, FaCodeBranch, FaChalkboard, FaEdit } from 'react-icons/fa';
 import { SiGoogleclassroom } from 'react-icons/si';
@@ -9,21 +9,49 @@ import { Announcements } from '@/components/Announcements';
 import Link from 'next/link';
 import { PerformanceChart } from '@/components/PerformanceChart';
 import { FormModal } from '@/components/FormModal';
-import { CLASS_LIST_QUERY, SUBJECTS_LIST_QUERY, TEACHERS_INFO_BY_ID } from '@/sanity/lib/queries';
+import {
+    CLASS_LIST_QUERY,
+    CLASS_LIST_QUERY_ALL_COUNT,
+    SUBJECTS_LIST_ALL_COUNT,
+    SUBJECTS_LIST_QUERY,
+    TEACHERS_INFO_BY_ID,
+} from '@/sanity/lib/queries';
 import { client } from '@/sanity/lib/client';
 import moment from 'moment';
 import { Tooltip } from '@mui/material';
+import { ITEMS_PER_PAGE } from '@/lib/data';
 
-const TeacherProfilePage = async ({ params }: { params: Promise<{ id: string }> }) => {
-    const id = (await params).id;
-    const data = await client.fetch(TEACHERS_INFO_BY_ID, { id });
-    const getUniqueClasses = await client.fetch(CLASS_LIST_QUERY);
-    const SubjectsListTableData = await client.fetch(SUBJECTS_LIST_QUERY);
+const TeacherProfilePage = async ({
+    params,
+}: {
+    params: Promise<{ [key: string]: string | undefined }>;
+}) => {
+    const { id, page } = await params;
+    const p = page ? parseInt(page) : 1;
+    const [totalClsCount, totalSubCount] = await Promise.all([
+        client.fetch(CLASS_LIST_QUERY_ALL_COUNT),
+        client.fetch(SUBJECTS_LIST_ALL_COUNT),
+    ]);
+    const [data, getUniqueClasses, SubjectsListTableData] = await Promise.all([
+        client.fetch(TEACHERS_INFO_BY_ID, { id }),
+        client.fetch(CLASS_LIST_QUERY, {
+            start: (p - 1) * ITEMS_PER_PAGE,
+            limit: totalClsCount,
+        }),
+        client.fetch(SUBJECTS_LIST_QUERY, {
+            start: (p - 1) * ITEMS_PER_PAGE,
+            limit: totalSubCount,
+        }),
+    ]);
     const filteredClsData = getUniqueClasses?.map((d: any) => ({ _id: d?._id, name: d?.name }));
     const filteredSubData = SubjectsListTableData?.map((d: any) => ({
         _id: d?._id,
         subjectName: d?.subjectName,
     }));
+
+    const announcementsDatabyTeacherID = data?.classes?.flatMap(
+        (d: any) => d?.relatedAnnouncements
+    );
     return (
         <div className="flex-1 p-4 flex flex-col gap-4 xl:flex-row">
             {/* Left */}
@@ -58,7 +86,7 @@ const TeacherProfilePage = async ({ params }: { params: Promise<{ id: string }> 
                                 {data?.description?.length > 150 ? (
                                     <>
                                         <Tooltip title={data?.description}>
-                                            {data?.description?.slice(0, 150)}...
+                                            <span>{data?.description?.slice(0, 150)}...</span>
                                         </Tooltip>
                                     </>
                                 ) : (
@@ -164,10 +192,7 @@ const TeacherProfilePage = async ({ params }: { params: Promise<{ id: string }> 
                     </div>
                 </div>
                 <PerformanceChart chartData={data?.Performance} />
-                <Announcements
-                    announcementData={data?.relatedAnnouncements}
-                    top3Data={data?.relatedAnnouncementTop3}
-                />
+                <Announcements announcementData={announcementsDatabyTeacherID} />
             </div>
         </div>
     );

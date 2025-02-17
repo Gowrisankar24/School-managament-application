@@ -1,15 +1,25 @@
 import React from 'react';
 import { FaFilter, FaPlus, FaEdit, FaSortAmountDown } from 'react-icons/fa';
 import { MdDeleteOutline } from 'react-icons/md';
-import { assignmentsListData, role } from '@/lib/data';
-import { TableSearchCompo } from '@/components/TableSearchCompo';
-import { Table } from '@/components/Table';
-import { Pagination } from '@/components/Pagination';
+import { assignmentsListData, ITEMS_PER_PAGE, role } from '@/lib/data';
+import TableSearchCompo from '@/components/TableSearchCompo';
+import Table from '@/components/Table';
+import Pagination from '@/components/Pagination';
 import { FormModal } from '@/components/FormModal';
-import { sanityFetch } from '@/sanity/lib/live';
-import { ASSIGNMENTS_LIST_QUERY } from '@/sanity/lib/queries';
+import {
+    ASSIGMENTS_LIST_ALL_QUERY,
+    ASSIGNMENTS_LIST_QUERY,
+    CLASS_LIST_QUERY,
+    CLASS_LIST_QUERY_ALL_COUNT,
+    SUBJECTS_LIST_ALL_COUNT,
+    SUBJECTS_LIST_QUERY,
+    TEACHERS_LIST_ALL_COUNT,
+    TEACHERS_LIST_QUERY,
+} from '@/sanity/lib/queries';
+import { client } from '@/sanity/lib/client';
 
 type Assignment = {
+    _id: string;
     assignmentId: number | string;
     subject: { [key: string]: string | number };
     class: { [key: string]: string | number };
@@ -46,16 +56,62 @@ const headerColumns = [
 const AssignmentsListPage = async ({
     searchParams,
 }: {
-    searchParams: Promise<{ teacherId?: string; classId?: string }>;
+    searchParams: Promise<{ [key: string]: string | undefined }>;
 }) => {
-    const { teacherId: id, classId: searchParamClassId } = await searchParams;
-    const { data: AssignmentListTableData } = await sanityFetch({ query: ASSIGNMENTS_LIST_QUERY });
+    const { teacherId: id, classId: searchParamClassId, page } = await searchParams;
+    const p = page ? parseInt(page) : 1;
+    const [getTotalClsCount, TeachersListTotalCount, getTotalSubCount] = await Promise.all([
+        client.fetch(CLASS_LIST_QUERY_ALL_COUNT),
+        client.fetch(TEACHERS_LIST_ALL_COUNT),
+        client.fetch(SUBJECTS_LIST_ALL_COUNT),
+    ]);
+    const [
+        AssignmentListTableData,
+        totalAssignmentQuery,
+        getClassesListTableData,
+        TeachersTableList,
+        getSubjectsListTableData,
+    ] = await Promise.all([
+        client.fetch(ASSIGNMENTS_LIST_QUERY, {
+            start: (p - 1) * ITEMS_PER_PAGE,
+            limit: ITEMS_PER_PAGE,
+        }),
+        client.fetch(ASSIGMENTS_LIST_ALL_QUERY),
+        client.fetch(CLASS_LIST_QUERY, {
+            start: (p - 1) * ITEMS_PER_PAGE,
+            limit: getTotalClsCount,
+        }),
+        client.fetch(TEACHERS_LIST_QUERY, {
+            start: (p - 1) * ITEMS_PER_PAGE,
+            limit: TeachersListTotalCount,
+        }),
+        client.fetch(SUBJECTS_LIST_QUERY, {
+            start: (p - 1) * ITEMS_PER_PAGE,
+            limit: getTotalSubCount,
+        }),
+    ]);
+
     //filter data table
     const FilteredTableData = id
         ? AssignmentListTableData?.filter((d: any) => d?.teacher?.teacherId === id)
         : searchParamClassId
           ? AssignmentListTableData?.filter((d: any) => d?.class?.classId === searchParamClassId)
           : AssignmentListTableData;
+
+    const uniqueClasses = getClassesListTableData?.map((d: { [key: string]: string | number }) => ({
+        _id: d?._id,
+        name: d?.name,
+    }));
+    const getTeachersNameList = TeachersTableList?.map((d: { [key: string]: string }) => ({
+        _id: d?._id,
+        name: d?.name,
+    }));
+    const getUniqueSubjects = getSubjectsListTableData?.map(
+        (d: { [key: string]: string | number }) => ({
+            _id: d?._id,
+            subjectName: d?.subjectName,
+        })
+    );
     const renderRow = (item: Assignment) => {
         return (
             <tr
@@ -75,11 +131,14 @@ const AssignmentsListPage = async ({
                                     type="update"
                                     data={item}
                                     icon={<FaEdit className="text-sm" />}
+                                    dropdownClsData={uniqueClasses}
+                                    dropDownTeacherList={getTeachersNameList}
+                                    dropdownSubsData={getUniqueSubjects}
                                 />
                                 <FormModal
                                     table="assignment"
                                     type="delete"
-                                    id={item?.assignmentId}
+                                    id={item?._id}
                                     icon={<MdDeleteOutline className="text-lg" />}
                                 />
                             </>
@@ -109,6 +168,9 @@ const AssignmentsListPage = async ({
                                 table="assignment"
                                 type="create"
                                 icon={<FaPlus className="text-[15px]" />}
+                                dropDownTeacherList={getTeachersNameList}
+                                dropdownSubsData={getUniqueSubjects}
+                                dropdownClsData={uniqueClasses}
                             />
                         )}
                     </div>
@@ -122,7 +184,7 @@ const AssignmentsListPage = async ({
 
                     {/* Pagination */}
                     <div className="">
-                        <Pagination />
+                        <Pagination page={p} totalCount={totalAssignmentQuery} />
                     </div>
                 </>
             ) : (

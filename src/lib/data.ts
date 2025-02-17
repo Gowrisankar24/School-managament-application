@@ -1,5 +1,15 @@
 export const role: string = 'admin';
 export const ITEMS_PER_PAGE = 10;
+export const TIME_REGEX_FORMAT = /^([01]\d|2[0-3]):([0-5]\d)$/;
+export const TEACHER_DOC_TYPE = 'teacher';
+export const PARENT_DOC_TYPE = 'parent';
+export const CLASS_DOC_TYPE = 'class';
+export const EXAM_DOC_TYPE = 'exam';
+export const ASSIGNMENT_DOC_TYPE = 'assignment';
+export const RESULTS_DOC_TYPE = 'result';
+export const EVENTS_DOC_TYPE = 'event';
+export const ANNOUNCEMENTS_DOC_TYPE = 'announcement';
+export const RADIAL_BAR_COLORS = ['white', '#84baf5', '#edd51c'];
 
 export const calendarEvents = [
     {

@@ -102,12 +102,12 @@ export const teacherTableTypes = defineType({
             type: 'number',
             // validation: Rule => Rule.required(),
         }),
-        defineField({
-            name: 'lessons',
-            type: 'array',
-            of: [{ type: 'reference', to: [{ type: 'lesson' }] }],
-            // validation: Rule => Rule.required(),
-        }),
+        // defineField({
+        //     name: 'lessons',
+        //     type: 'array',
+        //     of: [{ type: 'reference', to: [{ type: 'lesson' }] }],
+        //     // validation: Rule => Rule.required(),
+        // }),
         defineField({
             name: 'Performance',
             type: 'array',
