@@ -2,7 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Navbar } from '@/components/Navbar';
 import { ToastContainer } from 'react-toastify';
-import Menu from '@/components/Menu';
+import { Menu } from '@/components/Menu';
 
 export default function DashboardLayout({ children }: Readonly<{ children: React.ReactNode }>) {
     return (

@@ -1,7 +1,7 @@
 import React from 'react';
 import { FaFilter, FaPlus, FaEdit, FaSortAmountDown } from 'react-icons/fa';
 import { MdDeleteOutline } from 'react-icons/md';
-import { announcementsData, ITEMS_PER_PAGE, role } from '@/lib/data';
+import { ITEMS_PER_PAGE, role } from '@/lib/data';
 import TableSearchCompo from '@/components/TableSearchCompo';
 import Table from '@/components/Table';
 import Pagination from '@/components/Pagination';

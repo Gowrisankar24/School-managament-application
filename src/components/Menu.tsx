@@ -13,8 +13,10 @@ import { AiOutlineLogout } from 'react-icons/ai';
 import Link from 'next/link';
 import { role } from '@/lib/data';
 
-const Menu = () => {
-    const [selectedItem, setSelectedItem] = useState<string>(window?.location?.pathname);
+export const Menu = () => {
+    const [selectedItem, setSelectedItem] = useState<string>(() =>
+        typeof window !== 'undefined' ? window.location.pathname : ''
+    );
 
     const MenuItems = [
         {
@@ -130,6 +132,7 @@ const Menu = () => {
             ],
         },
     ];
+
     return (
         <div className="mt-4 text-sm overflow-x-hidden overflow-y-auto h-[90%] max-h-[95%] side-bar">
             {MenuItems?.map(i => (
@@ -139,7 +142,7 @@ const Menu = () => {
                     </summary>
                     {i?.items?.map(d =>
                         role ? (
-                            d?.visible?.includes(role) && (
+                            d?.visible?.includes(role) ? (
                                 <Link
                                     href={d?.href}
                                     key={d?.label}
@@ -149,7 +152,7 @@ const Menu = () => {
                                     <span className="text-2xl">{d?.icon}</span>
                                     <span className="hidden lg:block">{d?.label}</span>
                                 </Link>
-                            )
+                            ) : null
                         ) : (
                             <div>Loading...</div>
                         )
@@ -159,5 +162,3 @@ const Menu = () => {
         </div>
     );
 };
-
-export default Menu;
