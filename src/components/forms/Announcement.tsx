@@ -53,7 +53,7 @@ export const AnnouncementForm = ({
             } = event;
             setSelectedClsList(value);
         },
-        [selectedClsList]
+        [selectedClsList],
     );
     const hanldeTeacherChange = useCallback(
         (event: SelectChangeEvent<typeof seletedTeachersList>) => {
@@ -62,7 +62,7 @@ export const AnnouncementForm = ({
             } = event;
             setSeletedTeachersList(value);
         },
-        [seletedTeachersList]
+        [seletedTeachersList],
     );
     const onSubmitForm = handleSubmit(async formData => {
         const formPropAnnouncement = {
@@ -153,7 +153,7 @@ export const AnnouncementForm = ({
                                                 key={selected}
                                                 label={
                                                     dropdownClsData?.find(
-                                                        (item: any) => item?._id == selected
+                                                        (item: any) => item?._id == selected,
                                                     )?.name
                                                 }
                                             />
@@ -181,7 +181,7 @@ export const AnnouncementForm = ({
                                                 key={selected}
                                                 label={
                                                     dropDownTeacherList?.find(
-                                                        (item: any) => item?._id == selected
+                                                        (item: any) => item?._id == selected,
                                                     )?.name
                                                 }
                                             />

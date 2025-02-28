@@ -95,7 +95,7 @@ const StudentListPage = async ({
     //filter students data
     const filteredStudentTableData = id
         ? StudentsTableData?.filter(
-              (d: { [key: string]: any }) => d?.class?.supervisor?.teacherId === id
+              (d: { [key: string]: any }) => d?.class?.supervisor?.teacherId === id,
           )
         : StudentsTableData;
 
@@ -103,14 +103,14 @@ const StudentListPage = async ({
         (d: { [key: string]: string | number }) => ({
             _id: d?._id,
             subjectName: d?.subjectName,
-        })
+        }),
     );
 
     const uniquesClasses = getClassesListTableData?.map(
         (d: { [key: string]: string | number }) => ({
             _id: d?._id,
             name: d?.name,
-        })
+        }),
     );
     const renderRow = (item: Student) => {
         return (
@@ -128,7 +128,7 @@ const StudentListPage = async ({
                     />
                     <div className="flex flex-col">
                         <h3 className="font-semibold">{item?.name}</h3>
-                        <p className="text-xs text-gray-400">{item?.class?.name}</p>
+                        <p className="font-mono text-xs text-gray-400">{item?.class?.name}</p>
                     </div>
                 </td>
                 <td className="hidden md:table-cell">{item?.studentId}</td>

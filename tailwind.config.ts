@@ -8,6 +8,10 @@ export default {
     ],
     theme: {
         extend: {
+            fontFamily: {
+                'work-sans': ['var(--font-work-sans)'],
+                mono: ['var(--font-roboto-serif)'],
+            },
             colors: {
                 background: 'var(--background)',
                 foreground: 'var(--foreground)',

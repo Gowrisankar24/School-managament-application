@@ -130,7 +130,7 @@ const ResultsListPage = async ({
         (d: { [key: string]: string | number }) => ({
             _id: d?._id,
             subjectName: d?.subjectName,
-        })
+        }),
     );
     const getFilterStudentName = getStudentListTableData?.map((d: { [key: string]: string }) => ({
         _id: d?._id,

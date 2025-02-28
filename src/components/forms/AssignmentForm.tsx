@@ -55,7 +55,7 @@ const AssignmentForm = ({
             } = event;
             setSelectedClsList(value);
         },
-        [selectedClsList]
+        [selectedClsList],
     );
     const hanldeSubChange = useCallback(
         (event: SelectChangeEvent<typeof selectedSubList>) => {
@@ -64,7 +64,7 @@ const AssignmentForm = ({
             } = event;
             setSelectedSubList(value);
         },
-        [selectedSubList]
+        [selectedSubList],
     );
     const hanldeTeachersChange = useCallback(
         (event: SelectChangeEvent<typeof seletedTeachersList>) => {
@@ -73,7 +73,7 @@ const AssignmentForm = ({
             } = event;
             setSeletedTeachersList(value);
         },
-        [seletedTeachersList]
+        [seletedTeachersList],
     );
     const onSubmitForm = handleSubmit(async formData => {
         const formPropAssignment = {
@@ -166,7 +166,7 @@ const AssignmentForm = ({
                                                 key={selected}
                                                 label={
                                                     dropdownClsData?.find(
-                                                        (item: any) => item?._id == selected
+                                                        (item: any) => item?._id == selected,
                                                     )?.name
                                                 }
                                             />
@@ -194,7 +194,7 @@ const AssignmentForm = ({
                                                 key={selected}
                                                 label={
                                                     dropdownSubsData?.find(
-                                                        (item: any) => item?._id == selected
+                                                        (item: any) => item?._id == selected,
                                                     )?.subjectName
                                                 }
                                             />
@@ -220,7 +220,7 @@ const AssignmentForm = ({
                                                 key={selected}
                                                 label={
                                                     dropDownTeacherList?.find(
-                                                        (item: any) => item?._id == selected
+                                                        (item: any) => item?._id == selected,
                                                     )?.name
                                                 }
                                             />

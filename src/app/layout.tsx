@@ -26,9 +26,7 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
-            <body
-                className={`${inter.variable} ${roboto_mono.variable} antialiased overflow-hidden`}
-            >
+            <body className={`${inter.variable} ${roboto_mono.variable} overflow-hidden`}>
                 {children}
             </body>
         </html>

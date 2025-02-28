@@ -102,14 +102,14 @@ const ExamsListPage = async ({
         (d: { [key: string]: string | number }) => ({
             _id: d?._id,
             subjectName: d?.subjectName,
-        })
+        }),
     );
 
     const uniquesClasses = getClassesListTableData?.map(
         (d: { [key: string]: string | number }) => ({
             _id: d?._id,
             name: d?.name,
-        })
+        }),
     );
     const renderRow = (item: Exams) => {
         return (

@@ -267,7 +267,7 @@ const ParentForm = ({
                                                                 label={
                                                                     dropdownStudentData?.find(
                                                                         (item: any) =>
-                                                                            item?._id == value
+                                                                            item?._id == value,
                                                                     )?.name
                                                                 }
                                                             />

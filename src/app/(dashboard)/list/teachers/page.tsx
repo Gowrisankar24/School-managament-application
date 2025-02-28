@@ -103,7 +103,7 @@ const TeachersListPage = async ({
     const FilteredTableData = classIdQueryParams
         ? TeachersListTableData?.map((record: { [key: string]: any }) => {
               const filteredByCls = record?.classes?.filter(
-                  (c: { [key: string]: string | number }) => c?.classId === classIdQueryParams
+                  (c: { [key: string]: string | number }) => c?.classId === classIdQueryParams,
               );
               if (filteredByCls?.length > 0) {
                   return {
@@ -131,7 +131,7 @@ const TeachersListPage = async ({
                     />
                     <div className="flex flex-col">
                         <h3 className="font-semibold">{item?.name}</h3>
-                        <p className="text-xs text-gray-400">{item?.email}</p>
+                        <p className="font-mono text-xs text-gray-400">{item?.email}</p>
                     </div>
                 </td>
                 <td className="hidden md:table-cell">{item?.teacherId}</td>

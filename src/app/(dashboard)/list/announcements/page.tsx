@@ -6,7 +6,6 @@ import TableSearchCompo from '@/components/TableSearchCompo';
 import Table from '@/components/Table';
 import Pagination from '@/components/Pagination';
 import { FormModal } from '@/components/FormModal';
-import { sanityFetch } from '@/sanity/lib/live';
 import {
     ANNOUNCEMENTS_LIST_COUNT_ALL,
     ANNOUNCEMENTS_LIST_QUERY,

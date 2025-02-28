@@ -1,8 +1,9 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Calendar, momentLocalizer, View, Views } from 'react-big-calendar';
-import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
+import moment from 'moment';
+import { isEmpty } from 'lodash';
 
 type ScheduleDataTypes = {
     start: string;
@@ -11,28 +12,36 @@ type ScheduleDataTypes = {
     title: { [key: string]: string };
     class?: { [key: string]: string };
 };
-const localizer = momentLocalizer(moment);
 
 export const ScheduleBigCalendar = ({ scheduleData }: { scheduleData: ScheduleDataTypes[] }) => {
+    const localizer = momentLocalizer(moment);
+    const [calendarData, setCalendarData] = useState<ScheduleDataTypes[]>([]);
     const [view, setView] = useState<View>(Views.WORK_WEEK);
-    const EventData = scheduleData?.map((data: any) => ({
-        start: moment(data?.start).toDate(),
-        end: moment(data?.end).toDate(),
-        title: (
-            <span>
-                {data?.title?.subjectName} ({data?.class?.name})
-            </span>
-        ),
-    }));
+
+    useEffect(() => {
+        if (!isEmpty(scheduleData)) {
+            const EventData = scheduleData?.map((data: any) => ({
+                start: moment(data?.start).toDate(),
+                end: moment(data?.end).toDate(),
+                title: (
+                    <span>
+                        {data?.title?.subjectName} ({data?.class?.name})
+                    </span>
+                ),
+            }));
+            setCalendarData(EventData as any);
+        }
+    }, []);
+
     const handleChangeView = (selectedView: View) => {
         setView(selectedView);
     };
     return (
         <>
-            {scheduleData?.length > 0 ? (
+            {calendarData?.length > 0 ? (
                 <Calendar
                     localizer={localizer}
-                    events={EventData}
+                    events={calendarData}
                     startAccessor="start"
                     endAccessor="end"
                     view={view}
@@ -52,9 +61,13 @@ export const ScheduleBigCalendar = ({ scheduleData }: { scheduleData: ScheduleDa
                 />
             ) : (
                 <div className="flex justify-center items-center">
-                    <h2 className="text-gray-800 items-center text-xl">
-                        No Schedule has been allotted
-                    </h2>
+                    {calendarData?.length === 0 ? (
+                        <h2 className="text-gray-800 items-center text-xl">
+                            No Schedule has been allotted
+                        </h2>
+                    ) : (
+                        <h2 className="text-gray-800 items-center text-xl">Loading...!</h2>
+                    )}
                 </div>
             )}
         </>

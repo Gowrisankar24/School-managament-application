@@ -61,7 +61,7 @@ const ResultForm = ({
             } = event;
             setSelectedSubList(value);
         },
-        [selectedSubList]
+        [selectedSubList],
     );
     const handleClsChange = useCallback(
         (event: SelectChangeEvent<typeof selectedClsList>) => {
@@ -70,7 +70,7 @@ const ResultForm = ({
             } = event;
             setSelectedClsList(value);
         },
-        [selectedClsList]
+        [selectedClsList],
     );
     const handleTeacherChange = useCallback(
         (event: SelectChangeEvent<typeof selectedTeacherList>) => {
@@ -79,7 +79,7 @@ const ResultForm = ({
             } = event;
             setSelectedTeacherList(value);
         },
-        [selectedTeacherList]
+        [selectedTeacherList],
     );
     const handleStudentChange = useCallback(
         (event: SelectChangeEvent<typeof selectedStudentList>) => {
@@ -88,7 +88,7 @@ const ResultForm = ({
             } = event;
             setSelectedStudentList(value);
         },
-        [selectedStudentList]
+        [selectedStudentList],
     );
     const onSubmitForm = handleSubmit(async (formData: any) => {
         const formPropResult = {
@@ -188,7 +188,7 @@ const ResultForm = ({
                                                 key={selected}
                                                 label={
                                                     dropdownStudentData?.find(
-                                                        (item: any) => item?._id == selected
+                                                        (item: any) => item?._id == selected,
                                                     )?.name
                                                 }
                                             />
@@ -216,7 +216,7 @@ const ResultForm = ({
                                                 key={selected}
                                                 label={
                                                     dropdownSubsData?.find(
-                                                        (item: any) => item?._id == selected
+                                                        (item: any) => item?._id == selected,
                                                     )?.subjectName
                                                 }
                                             />
@@ -242,7 +242,7 @@ const ResultForm = ({
                                                 key={selected}
                                                 label={
                                                     dropdownClsData?.find(
-                                                        (item: any) => item?._id == selected
+                                                        (item: any) => item?._id == selected,
                                                     )?.name
                                                 }
                                             />
@@ -268,7 +268,7 @@ const ResultForm = ({
                                                 key={selected}
                                                 label={
                                                     dropDownTeacherList?.find(
-                                                        (item: any) => item?._id == selected
+                                                        (item: any) => item?._id == selected,
                                                     )?.name
                                                 }
                                             />
