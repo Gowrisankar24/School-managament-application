@@ -111,10 +111,9 @@ const SubjectsListPage = async ({
         ? ClassListTableData.filter((d: any) => d?.supervisor?.teacherId === id)
         : searchClassId
           ? ClassListTableData?.filter(
-                (d: { [key: string]: string | number }) => d?.classId === searchClassId
+                (d: { [key: string]: string | number }) => d?.classId === searchClassId,
             )
           : ClassListTableData;
-    console.log('ClassListTableData', ClassListTableData);
     return (
         <div className="bg-white p-4 flex-1 rounded-md m-4 mt-0">
             {/* Top */}

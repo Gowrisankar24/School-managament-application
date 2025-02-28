@@ -48,7 +48,7 @@ const SubjectForm = ({
             } = event;
             setSelectedTeachersList(typeof value === 'string' ? value.split(',') : value);
         },
-        [seletedTeachersList]
+        [seletedTeachersList],
     );
     const onSubmitForm = handleSubmit(async formData => {
         const formPropSubjects = {
@@ -140,7 +140,7 @@ const SubjectForm = ({
                                                             label={
                                                                 dropDownTeacherList?.find(
                                                                     (item: any) =>
-                                                                        item?._id == value
+                                                                        item?._id == value,
                                                                 )?.name
                                                             }
                                                         />

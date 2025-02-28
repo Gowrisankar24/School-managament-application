@@ -380,7 +380,7 @@ export const STUDENTS_INFO_BY_ID = defineQuery(`
 
 export const STUDENTS_SCHEDULE_TIMINGS = defineQuery(`
   *[_type == 'teacher' && defined(ScheduleTime)]{
-      ScheduleTime[class._ref == $id]{
+      ScheduleTime[class._ref == $id || $id == 'all']{
         start,
         end,
         class ->{

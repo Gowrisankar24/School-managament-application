@@ -47,7 +47,7 @@ const ClassForm = ({
             } = event;
             setSelectedTeachersList(value);
         },
-        [seletedTeachersList]
+        [seletedTeachersList],
     );
 
     const onSubmitForm = handleSubmit(async formData => {
@@ -145,7 +145,7 @@ const ClassForm = ({
                                                 key={selected}
                                                 label={
                                                     dropDownTeacherList?.find(
-                                                        (item: any) => item?._id == selected
+                                                        (item: any) => item?._id == selected,
                                                     )?.name
                                                 }
                                             />

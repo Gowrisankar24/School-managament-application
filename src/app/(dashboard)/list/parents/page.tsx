@@ -83,7 +83,7 @@ const ParentListPage = async ({
                 <td className="flex items-center gap-4 p-3">
                     <div className="flex flex-col">
                         <h3 className="font-semibold">{item?.name}</h3>
-                        <p className="text-xs text-gray-400">{item?.email}</p>
+                        <p className="font-mono text-xs text-gray-400">{item?.email}</p>
                     </div>
                 </td>
                 <td className="hidden md:table-cell">

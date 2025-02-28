@@ -89,7 +89,7 @@ export const FormModal = ({
     const forms: {
         [key: string]: (
             type: 'create' | 'update',
-            data?: any
+            data?: any,
             // setOpen?: Dispatch<SetStateAction<Boolean>>
         ) => JSX.Element;
     } = {
@@ -200,7 +200,7 @@ export const FormModal = ({
                     {
                         position: 'top-right',
                         autoClose: 5000,
-                    }
+                    },
                 );
                 router.push(window.location.pathname);
             } else {

@@ -22,11 +22,9 @@ export const events = [
     },
 ];
 export const EventCalendar = async ({
-    date,
     data,
     modalData,
 }: {
-    date: Date;
     data: Array<{ [key: string]: string }>;
     modalData: Array<{ [key: string]: string }>;
 }) => {

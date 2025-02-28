@@ -15,7 +15,7 @@ import { role } from '@/lib/data';
 
 export const Menu = () => {
     const [selectedItem, setSelectedItem] = useState<string>(() =>
-        typeof window !== 'undefined' ? window.location.pathname : ''
+        typeof window !== 'undefined' ? window.location.pathname : '',
     );
 
     const MenuItems = [
@@ -155,7 +155,7 @@ export const Menu = () => {
                             ) : null
                         ) : (
                             <div>Loading...</div>
-                        )
+                        ),
                     )}
                 </details>
             ))}

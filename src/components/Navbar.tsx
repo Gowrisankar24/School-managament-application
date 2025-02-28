@@ -13,7 +13,9 @@ export const Navbar = () => {
                 <input
                     type="text"
                     placeholder="Search..."
+                    defaultValue={''}
                     className="w-60 p-2 bg-transparent outline-none"
+                    suppressHydrationWarning
                 />
             </div>
 

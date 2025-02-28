@@ -110,7 +110,7 @@ const AssignmentsListPage = async ({
         (d: { [key: string]: string | number }) => ({
             _id: d?._id,
             subjectName: d?.subjectName,
-        })
+        }),
     );
     const renderRow = (item: Assignment) => {
         return (

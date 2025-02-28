@@ -93,7 +93,7 @@ const AdminPage = async ({ searchParams }: { searchParams: Promise<{ date: Date 
 
             {/* right */}
             <div className="w-full lg:w-1/3 flex flex-col gap-8">
-                <EventCalendar date={date} data={eventsData} modalData={modalEventsData} />
+                <EventCalendar data={eventsData} modalData={modalEventsData} />
                 <Announcements announcementData={announceMentTotalData} />
             </div>
         </div>

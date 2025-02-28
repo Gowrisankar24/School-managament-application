@@ -50,7 +50,7 @@ const TeacherProfilePage = async ({
     }));
 
     const announcementsDatabyTeacherID = data?.classes?.flatMap(
-        (d: any) => d?.relatedAnnouncements
+        (d: any) => d?.relatedAnnouncements,
     );
     return (
         <div className="flex-1 p-4 flex flex-col gap-4 xl:flex-row">

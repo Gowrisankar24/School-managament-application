@@ -56,7 +56,7 @@ const ExamForm = ({
             } = event;
             setseletedTeachersList(value);
         },
-        [seletedTeachersList]
+        [seletedTeachersList],
     );
     const hanldeSubChange = useCallback(
         (event: SelectChangeEvent<typeof selectedSubList>) => {
@@ -65,7 +65,7 @@ const ExamForm = ({
             } = event;
             setSelectedSubList(value);
         },
-        [selectedSubList]
+        [selectedSubList],
     );
     const hanldeClsChange = useCallback(
         (event: SelectChangeEvent<typeof selectedClsList>) => {
@@ -74,7 +74,7 @@ const ExamForm = ({
             } = event;
             setSelectedClsList(value);
         },
-        [selectedClsList]
+        [selectedClsList],
     );
     const onSubmitForm = handleSubmit(async formData => {
         const formPropExamList = {
@@ -166,7 +166,7 @@ const ExamForm = ({
                                                 key={selected}
                                                 label={
                                                     dropdownClsData?.find(
-                                                        (item: any) => item?._id == selected
+                                                        (item: any) => item?._id == selected,
                                                     )?.name
                                                 }
                                             />
@@ -194,7 +194,7 @@ const ExamForm = ({
                                                 key={selected}
                                                 label={
                                                     dropdownSubsData?.find(
-                                                        (item: any) => item?._id == selected
+                                                        (item: any) => item?._id == selected,
                                                     )?.subjectName
                                                 }
                                             />
@@ -220,7 +220,7 @@ const ExamForm = ({
                                                 key={selected}
                                                 label={
                                                     dropDownTeacherList?.find(
-                                                        (item: any) => item?._id == selected
+                                                        (item: any) => item?._id == selected,
                                                     )?.name
                                                 }
                                             />

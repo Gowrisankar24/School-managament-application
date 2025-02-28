@@ -62,7 +62,7 @@ const TeacherForm = ({
             } = event;
             setSelectedSubjectVal(Array.isArray(value) ? value : value.split(','));
         },
-        [selectedSubjectVal]
+        [selectedSubjectVal],
     );
 
     //select cls value change
@@ -73,7 +73,7 @@ const TeacherForm = ({
             } = event;
             setSelectedClsVal(typeof value === 'string' ? value.split(',') : value);
         },
-        [selectedClsVal]
+        [selectedClsVal],
     );
     const onSubmitForm = handleSubmit(async formData => {
         try {
@@ -303,7 +303,7 @@ const TeacherForm = ({
                                                                     label={
                                                                         dropdownSubsData?.find(
                                                                             (item: any) =>
-                                                                                item?._id == value
+                                                                                item?._id == value,
                                                                         )?.subjectName
                                                                     }
                                                                 />
@@ -352,7 +352,7 @@ const TeacherForm = ({
                                                                     label={
                                                                         dropdownClsData?.find(
                                                                             (item: any) =>
-                                                                                item?._id == value
+                                                                                item?._id == value,
                                                                         )?.name
                                                                     }
                                                                 />

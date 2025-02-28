@@ -49,10 +49,8 @@ const StudentProfilePage = async ({
     });
 
     const ScheduleData = studentScheduleTimingData?.flatMap(
-        (d: { [key: string]: string }) => d?.ScheduleTime
+        (d: { [key: string]: string }) => d?.ScheduleTime,
     );
-
-    console.log('StudentProfileData', ScheduleData);
     return (
         <div className="flex-1 p-4 flex flex-col gap-4 xl:flex-row">
             {/* Left */}

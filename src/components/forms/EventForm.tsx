@@ -48,7 +48,7 @@ const EventForm = ({
             } = event;
             setSelectedClsList(value);
         },
-        [selectedClsList]
+        [selectedClsList],
     );
 
     const onSubmitForm = handleSubmit(async formData => {
@@ -160,7 +160,7 @@ const EventForm = ({
                                                 key={selected}
                                                 label={
                                                     dropdownClsData?.find(
-                                                        (item: any) => item?._id == selected
+                                                        (item: any) => item?._id == selected,
                                                     )?.name
                                                 }
                                             />
